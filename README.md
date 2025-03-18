@@ -67,3 +67,26 @@ Simply open [Lovable](https://lovable.dev/projects/0b9aa85e-89c0-49d1-9178-ae8af
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+
+## Build Docker Image
+
+Build docker image (locally).
+
+```
+docker build -t cheers-counter .
+```
+
+Run the following command to test if the image works, then navigate to [http://localhost:8080](http://localhost:8080).
+
+```
+docker run -d -p 8080:80 cheers-counter
+```
+
+Stop the container by running `docker stop <container-id>`. List all running containers with command `docker ps`.
+
+Push image to dockerhub by running the following commands:
+
+```
+docker tag <image-id> nibir/cheers-counter
+docker push nibir/cheers-counter:<tagname>
+```
