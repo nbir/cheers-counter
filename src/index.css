@@ -43,6 +43,11 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Define glass effect colors */
+    --glass-bg: 0 0% 100%;
+    --glass-highlight: 0 0% 100%;
+    --glass-shadow: 0 0% 0%;
   }
 
   .dark {
@@ -81,6 +86,11 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark mode glass effect colors */
+    --glass-bg: 0 0% 10%;
+    --glass-highlight: 0 0% 30%;
+    --glass-shadow: 0 0% 0%;
   }
 }
 
@@ -99,7 +109,7 @@
 
 @layer components {
   .glass-effect {
-    @apply bg-glass bg-opacity-20 backdrop-blur-sm border border-glass-highlight shadow-lg;
+    @apply bg-white/30 bg-opacity-20 backdrop-blur-sm border border-white/30 shadow-lg;
   }
   
   .button-effect {

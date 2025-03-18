@@ -59,6 +59,16 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        beer: {
+          DEFAULT: "#F5BC41",
+          light: "#F8D775",
+          dark: "#D9A73D",
+        },
+        glass: {
+          DEFAULT: "rgba(var(--glass-bg), 0.3)",
+          highlight: "rgba(var(--glass-highlight), 0.3)",
+          shadow: "rgba(var(--glass-shadow), 0.1)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -78,11 +88,26 @@ const config = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-5px)" },
         },
+        "bubble-rise-small": {
+          "0%": { transform: "translateY(0) scale(1)", opacity: "0.7" },
+          "100%": { transform: "translateY(-100px) scale(1.5)", opacity: "0" }
+        },
+        "bubble-rise-medium": {
+          "0%": { transform: "translateY(0) scale(1)", opacity: "0.7" },
+          "100%": { transform: "translateY(-120px) scale(2)", opacity: "0" }
+        },
+        "bubble-rise-large": {
+          "0%": { transform: "translateY(0) scale(1)", opacity: "0.7" },
+          "100%": { transform: "translateY(-150px) scale(2.5)", opacity: "0" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 3s ease-in-out infinite",
+        "bubble-small": "bubble-rise-small 3s ease-in-out infinite",
+        "bubble-medium": "bubble-rise-medium 4s ease-in-out infinite",
+        "bubble-large": "bubble-rise-large 5s ease-in-out infinite"
       },
     },
   },
