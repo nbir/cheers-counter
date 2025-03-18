@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -59,6 +60,7 @@ This project is built with .
 - React
 - shadcn-ui
 - Tailwind CSS
+- Capacitor (for iOS/Android builds)
 
 ## How can I deploy this project?
 
@@ -89,4 +91,38 @@ Push image to dockerhub by running the following commands:
 ```
 docker tag <image-id> nibir/cheers-counter
 docker push nibir/cheers-counter:<tagname>
+```
+
+## iOS Development with Capacitor
+
+To build and run this project on iOS:
+
+1. Export the project to your own GitHub repository via the "Export to GitHub" button
+2. Git pull the project to your local machine
+3. Install the dependencies:
+   ```
+   npm install
+   ```
+4. Build the web app:
+   ```
+   npm run build
+   ```
+5. Add iOS platform:
+   ```
+   npx cap add ios
+   ```
+6. Sync the web build with the iOS project:
+   ```
+   npx cap sync ios
+   ```
+7. Open the project in Xcode:
+   ```
+   npx cap open ios
+   ```
+8. Use Xcode to run the app on a simulator or physical device
+
+After making changes to the web app, always rebuild and sync:
+```
+npm run build
+npx cap sync ios
 ```
