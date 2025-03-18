@@ -24,7 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       {/* Footer with subtle branding */}
       <footer className="py-6 px-4 text-center text-sm text-gray-400">
-        <p>2BeersDown • Drink Responsibly</p>
+        <p>BeerMeTwice • Drink Responsibly</p>
       </footer>
     </div>
   );

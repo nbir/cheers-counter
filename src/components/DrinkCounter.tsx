@@ -1,18 +1,31 @@
 
 import React, { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, AlertTriangle, Beer } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
+import { useDrinkStorage } from "@/hooks/useDrinkStorage";
+import DrinkHistoryTable from "./DrinkHistoryTable";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const DrinkCounter: React.FC = () => {
-  const [count, setCount] = useState(0);
   const maxCount = 12;
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { count, incrementCount, decrementCount, getDailyDrinkSummary } = useDrinkStorage();
   
-  const incrementCount = () => {
-    if (count < maxCount) {
-      setCount(prev => prev + 1);
-      
-      // Show different messages based on count
+  const handleIncrement = () => {
+    const success = incrementCount(maxCount);
+    
+    // Show different messages based on count
+    if (success) {
       if (count === 0) {
         toast("First drink! Cheers! 🍻");
       } else if (count === 1) {
@@ -27,25 +40,33 @@ const DrinkCounter: React.FC = () => {
     }
   };
   
-  const decrementCount = () => {
+  const handleDecrementRequest = () => {
     if (count > 0) {
-      setCount(prev => prev - 1);
+      setShowConfirmDialog(true);
     }
   };
+  
+  const handleConfirmDecrement = () => {
+    decrementCount();
+    setShowConfirmDialog(false);
+  };
+  
+  const drinkSummary = getDailyDrinkSummary();
   
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full max-w-md flex items-center justify-between gap-6 mb-8">
-        {/* Title with subtle animation */}
-        <h1 className="text-3xl md:text-4xl font-bold text-center mx-auto animate-float">
-          2BeersDown
+        {/* Title with updated font and icon */}
+        <h1 className="text-3xl md:text-4xl font-bold text-center mx-auto animate-float font-display flex items-center gap-2">
+          <Beer size={32} className="text-amber-500" />
+          <span>BeerMeTwice</span>
         </h1>
       </div>
       
       <div className="w-full max-w-md flex items-center justify-between px-4 mb-6 gap-4">
         {/* Minus button */}
         <button 
-          onClick={decrementCount} 
+          onClick={handleDecrementRequest} 
           disabled={count === 0}
           className="counter-btn"
           aria-label="Decrease drink count"
@@ -60,7 +81,7 @@ const DrinkCounter: React.FC = () => {
         
         {/* Plus button */}
         <button 
-          onClick={incrementCount}
+          onClick={handleIncrement}
           disabled={count === maxCount} 
           className="counter-btn"
           aria-label="Increase drink count"
@@ -80,6 +101,30 @@ const DrinkCounter: React.FC = () => {
           </p>
         )}
       </div>
+      
+      {/* Drink history table */}
+      <DrinkHistoryTable drinkSummary={drinkSummary} />
+      
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="text-amber-500 h-5 w-5" />
+              Remove Drink?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove a drink from your count?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDecrement}>
+              Yes, Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
