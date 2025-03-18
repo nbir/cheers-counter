@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,6 +25,20 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				beer: {
+					light: '#F8D775',
+					DEFAULT: '#F5BC41',
+					dark: '#D9A73D',
+				},
+				foam: {
+					DEFAULT: '#FFFFFF',
+					off: '#F9F5E7',
+				},
+				glass: {
+					DEFAULT: 'rgba(255, 255, 255, 0.25)',
+					highlight: 'rgba(255, 255, 255, 0.45)',
+					shadow: 'rgba(0, 0, 0, 0.05)',
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -70,25 +85,40 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' },
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' },
+				},
+				'bubble': {
+					'0%': { transform: 'translateY(0) scale(0)' },
+					'50%': { transform: 'translateY(-10px) scale(1)' },
+					'100%': { transform: 'translateY(-20px) scale(0)' },
+				},
+				'pour': {
+					'0%': { height: '0%' },
+					'100%': { height: 'var(--fill-height)' },
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' },
+				},
+				'button-press': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(0.95)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'bubble-small': 'bubble 2s infinite ease-in-out',
+				'bubble-medium': 'bubble 2.5s infinite ease-in-out',
+				'bubble-large': 'bubble 3s infinite ease-in-out',
+				'pour': 'pour 0.5s ease-out forwards',
+				'float': 'float 3s ease-in-out infinite',
+				'button-press': 'button-press 0.2s ease-in-out',
 			}
 		}
 	},
