@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import BeerGlass from "./BeerGlass";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 const DrinkCounter: React.FC = () => {
   const [count, setCount] = useState(0);
