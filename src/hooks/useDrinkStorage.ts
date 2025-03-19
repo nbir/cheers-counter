@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 // Define types for our drink data
@@ -9,6 +8,11 @@ interface DrinkEntry {
 
 interface DailyDrinkSummary {
   date: string;      // ISO date string
+  totalDrinks: number;
+}
+
+interface MonthlyDrinkSummary {
+  month: string;     // Month in YYYY-MM format
   totalDrinks: number;
 }
 
@@ -80,6 +84,18 @@ export function useDrinkStorage() {
     return count > 0;
   };
   
+  // Function to get adjusted date (day starts at 4:01am and ends at 4am)
+  const getAdjustedDay = (timestamp: number): string => {
+    const date = new Date(timestamp);
+    
+    // If time is between 00:00 and 04:00, consider it part of the previous day
+    if (date.getHours() < 4) {
+      date.setDate(date.getDate() - 1);
+    }
+    
+    return date.toISOString().split('T')[0]; // Return YYYY-MM-DD
+  };
+  
   // Get drink summary for the last 30 days
   const getDailyDrinkSummary = (): DailyDrinkSummary[] => {
     // Create a map to store drinks per day
@@ -91,18 +107,6 @@ export function useDrinkStorage() {
     // Get the date 30 days ago
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(now.getDate() - 30);
-    
-    // Function to get the adjusted date (day starts at 4:01am and ends at 4am)
-    const getAdjustedDay = (timestamp: number): string => {
-      const date = new Date(timestamp);
-      
-      // If time is between 00:00 and 04:00, consider it part of the previous day
-      if (date.getHours() < 4) {
-        date.setDate(date.getDate() - 1);
-      }
-      
-      return date.toISOString().split('T')[0]; // Return YYYY-MM-DD
-    };
     
     // Process history entries to count drinks per day
     drinkHistory.forEach((entry, index) => {
@@ -133,10 +137,99 @@ export function useDrinkStorage() {
     return summaryArray;
   };
   
+  // Get drink summary by month
+  const getMonthlyDrinkSummary = (): MonthlyDrinkSummary[] => {
+    const dailySummary = getDailyDrinkSummary();
+    const monthlyDrinks = new Map<string, number>();
+    
+    dailySummary.forEach(day => {
+      const month = day.date.substring(0, 7); // Get YYYY-MM from YYYY-MM-DD
+      monthlyDrinks.set(month, (monthlyDrinks.get(month) || 0) + day.totalDrinks);
+    });
+    
+    // Convert map to array
+    const summaryArray = Array.from(monthlyDrinks.entries())
+      .map(([month, drinks]) => ({ month, totalDrinks: drinks }))
+      .sort((a, b) => b.month.localeCompare(a.month)); // Sort by month, newest first
+      
+    return summaryArray;
+  };
+  
+  // Get today's drink count
+  const getTodaysDrinkCount = (): number => {
+    const today = getAdjustedDay(Date.now());
+    const dailySummary = getDailyDrinkSummary();
+    const todaySummary = dailySummary.find(day => day.date === today);
+    return todaySummary ? todaySummary.totalDrinks : 0;
+  };
+  
+  // Delete drinks for a specific date
+  const deleteDrinksByDate = (dateToDelete: string): void => {
+    // We need to identify all entries that belong to this date and remove their effect
+    const entriesToModify: DrinkEntry[] = [];
+    
+    // Group all entries by their adjusted day
+    const entriesByDay = new Map<string, DrinkEntry[]>();
+    
+    drinkHistory.forEach(entry => {
+      const day = getAdjustedDay(entry.timestamp);
+      if (!entriesByDay.has(day)) {
+        entriesByDay.set(day, []);
+      }
+      entriesByDay.get(day)!.push(entry);
+    });
+    
+    // Filter out the deleted date and any entries that came after it
+    const remainingEntries = drinkHistory.filter(entry => {
+      const day = getAdjustedDay(entry.timestamp);
+      return day !== dateToDelete;
+    });
+    
+    // Update the history and recalculate the current count
+    setDrinkHistory(remainingEntries);
+    
+    // If today's data was deleted, reset the count to 0
+    if (dateToDelete === getAdjustedDay(Date.now())) {
+      setCount(0);
+    } else {
+      // Otherwise, recalculate the current count based on remaining entries
+      const lastEntry = remainingEntries[remainingEntries.length - 1];
+      setCount(lastEntry ? lastEntry.count : 0);
+    }
+  };
+  
+  // Delete drinks for a specific month
+  const deleteDrinksByMonth = (monthToDelete: string): void => {
+    // Filter out entries from the specified month
+    const remainingEntries = drinkHistory.filter(entry => {
+      const day = getAdjustedDay(entry.timestamp);
+      return !day.startsWith(monthToDelete);
+    });
+    
+    // Update the history
+    setDrinkHistory(remainingEntries);
+    
+    // Check if current month was deleted
+    const currentMonth = getAdjustedDay(Date.now()).substring(0, 7);
+    
+    // If current month's data was deleted, reset the count to 0
+    if (monthToDelete === currentMonth) {
+      setCount(0);
+    } else {
+      // Otherwise, recalculate the current count based on remaining entries
+      const lastEntry = remainingEntries[remainingEntries.length - 1];
+      setCount(lastEntry ? lastEntry.count : 0);
+    }
+  };
+  
   return {
     count,
     incrementCount,
     decrementCount,
     getDailyDrinkSummary,
+    getMonthlyDrinkSummary,
+    getTodaysDrinkCount,
+    deleteDrinksByDate,
+    deleteDrinksByMonth,
   };
 }

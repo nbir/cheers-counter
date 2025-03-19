@@ -19,7 +19,15 @@ import {
 const DrinkCounter: React.FC = () => {
   const maxCount = 12;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { count, incrementCount, decrementCount, getDailyDrinkSummary } = useDrinkStorage();
+  const { 
+    count, 
+    incrementCount, 
+    decrementCount, 
+    getDailyDrinkSummary, 
+    getTodaysDrinkCount 
+  } = useDrinkStorage();
+  
+  const todayCount = getTodaysDrinkCount();
   
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
@@ -74,9 +82,9 @@ const DrinkCounter: React.FC = () => {
           <Minus size={24} className={count === 0 ? "text-gray-300" : "text-gray-800"} />
         </button>
         
-        {/* Beer glass */}
+        {/* Beer glass - now with today's count */}
         <div className="flex-1 flex justify-center py-4">
-          <BeerGlass count={count} maxCount={maxCount} />
+          <BeerGlass count={todayCount} maxCount={maxCount} />
         </div>
         
         {/* Plus button */}
@@ -90,12 +98,12 @@ const DrinkCounter: React.FC = () => {
         </button>
       </div>
       
-      {/* Counter label */}
+      {/* Counter label - showing today's count */}
       <div className="text-center mb-8">
         <p className="text-lg text-gray-500">
-          {count === 0 ? "No drinks yet" : count === 1 ? "1 drink" : `${count} drinks`}
+          {todayCount === 0 ? "No drinks today" : todayCount === 1 ? "1 drink today" : `${todayCount} drinks today`}
         </p>
-        {count >= 3 && (
+        {todayCount >= 3 && (
           <p className="text-sm text-amber-600 mt-1 font-medium">
             Remember to drink responsibly
           </p>
