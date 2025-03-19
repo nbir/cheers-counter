@@ -23,12 +23,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </main>
       
-      {/* Footer with subtle branding and My Data link */}
+      {/* Footer with subtle branding and links */}
       <footer className="py-6 px-4 text-center text-sm text-gray-400">
         <p>BeerMeTwice • Drink Responsibly</p>
-        <Link to="/my-data" className="mt-2 inline-block text-gray-400 hover:text-gray-500 underline">
-          My Data
-        </Link>
+        <div className="mt-2 flex justify-center space-x-4">
+          <Link to="/my-data" className="text-gray-400 hover:text-gray-500 underline">
+            My Data
+          </Link>
+          <Link to="/privacy" className="text-gray-400 hover:text-gray-500 underline">
+            Privacy Policy
+          </Link>
+        </div>
       </footer>
     </div>
   );
