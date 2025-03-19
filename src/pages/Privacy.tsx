@@ -1,6 +1,4 @@
-
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -10,17 +8,10 @@ const Privacy = () => {
     <Layout>
       <div className="w-full max-w-2xl mx-auto">
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-1"
-            asChild
-          >
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
+          <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+            <ArrowLeft size={20} />
+            <span>Back to Home</span>
+          </Link>
         </div>
 
         <div className="prose prose-sm max-w-none">
