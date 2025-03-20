@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Minus, AlertTriangle, Beer, Waves, DropletOff } from "lucide-react";
+import { Plus, Minus, AlertTriangle, Beer, Waves, Droplet } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
@@ -131,7 +131,7 @@ const DrinkCounter: React.FC = () => {
           >
             {showSpill ? (
               <>
-                <DropletOff size={16} />
+                <Droplet size={16} />
                 <span>Hide Spill</span>
               </>
             ) : (
