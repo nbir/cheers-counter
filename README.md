@@ -72,24 +72,22 @@ We don't support custom domains (yet). If you want to deploy your project under 
 
 ## Build Docker Image
 
-Build docker image (locally).
-
+1. Build docker image (locally).
 ```
 docker build -t cheers-counter .
 ```
-
-Run the following command to test if the image works, then navigate to [http://localhost:8080](http://localhost:8080).
-
+2. Run container to test if the image works. Navigate to [http://localhost:8080](http://localhost:8080).
 ```
 docker run -d -p 8080:80 cheers-counter
 ```
-
-Stop the container by running `docker stop <container-id>`. List all running containers with command `docker ps`.
-
-Push image to dockerhub by running the following commands:
-
+3. List all running containers with `docker ps -a`. Stop and delete container.
 ```
-docker tag <image-id> nibir/cheers-counter
+docker stop <container-id>
+docker container rm <container-id>
+```
+4. Tag and push image to Docker Hub.
+```
+docker tag <image-id> nibir/cheers-counter:<tag-name>
 docker push nibir/cheers-counter:<tagname>
 ```
 
@@ -126,3 +124,7 @@ After making changes to the web app, always rebuild and sync:
 npm run build
 npx cap sync ios
 ```
+
+## References
+
+- https://www.bacancytechnology.com/blog/prepare-your-ios-app-for-development-and-distribution
