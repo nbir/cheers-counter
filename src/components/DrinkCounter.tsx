@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Plus, Minus, AlertTriangle, Beer, Waves, WavesOff } from "lucide-react";
+import { Plus, Minus, AlertTriangle, Beer, Waves, DropletOff } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
@@ -38,7 +37,6 @@ const DrinkCounter: React.FC = () => {
   
   const todayCount = getTodaysDrinkCount();
   
-  // Save spill preference to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('showSpill', JSON.stringify(showSpill));
@@ -50,11 +48,9 @@ const DrinkCounter: React.FC = () => {
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
     
-    // Show different toast messages based on today's count
     if (success) {
       const newCount = todayCount + 1;
       
-      // Only show toast for specific drink milestones
       if (newCount === 1) {
         toast("First drink! Cheers! 🍻");
       } else if (newCount === 2) {
@@ -87,7 +83,6 @@ const DrinkCounter: React.FC = () => {
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-full max-w-md flex items-center justify-between gap-6 mb-8">
-        {/* Title with updated font and icon */}
         <h1 className="text-3xl md:text-4xl font-bold text-center mx-auto animate-float font-display flex items-center gap-2">
           <Beer size={32} className="text-amber-500" />
           <span>BeerMeTwice</span>
@@ -95,7 +90,6 @@ const DrinkCounter: React.FC = () => {
       </div>
       
       <div className="w-full max-w-md flex items-center justify-between px-4 mb-6 gap-4">
-        {/* Minus button */}
         <button 
           onClick={handleDecrementRequest} 
           disabled={count === 0}
@@ -105,12 +99,10 @@ const DrinkCounter: React.FC = () => {
           <Minus size={24} className={count === 0 ? "text-gray-300 dark:text-gray-600" : "text-gray-800 dark:text-gray-200"} />
         </button>
         
-        {/* Beer glass - now with today's count */}
         <div className="flex-1 flex justify-center py-4">
           <BeerGlass count={todayCount} maxCount={maxCount} showSpill={showSpill} />
         </div>
         
-        {/* Plus button */}
         <button 
           onClick={handleIncrement}
           className="counter-btn"
@@ -120,7 +112,6 @@ const DrinkCounter: React.FC = () => {
         </button>
       </div>
       
-      {/* Counter label - showing today's count */}
       <div className="text-center mb-8">
         <p className="text-lg text-gray-500 dark:text-gray-400">
           {todayCount === 0 ? "No drinks today" : todayCount === 1 ? "1 drink today" : `${todayCount} drinks today`}
@@ -132,7 +123,6 @@ const DrinkCounter: React.FC = () => {
         )}
       </div>
       
-      {/* Display spill toggle if today's drinks are >= 8 */}
       {todayCount >= 8 && (
         <div className="mb-6 flex justify-center">
           <button
@@ -141,7 +131,7 @@ const DrinkCounter: React.FC = () => {
           >
             {showSpill ? (
               <>
-                <WavesOff size={16} />
+                <DropletOff size={16} />
                 <span>Hide Spill</span>
               </>
             ) : (
@@ -154,10 +144,8 @@ const DrinkCounter: React.FC = () => {
         </div>
       )}
       
-      {/* Drink history table */}
       <DrinkHistoryTable drinkSummary={drinkSummary} />
       
-      {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
