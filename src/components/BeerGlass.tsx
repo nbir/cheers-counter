@@ -113,7 +113,7 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
   }, [count, showSpill]);
   
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Spill container (positioned above the glass) */}
       {showSpill && count >= 8 && (
         <div 
@@ -125,25 +125,34 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
         ></div>
       )}
       
-      <div className="beer-glass-hefeweizen relative w-full max-w-[120px] h-[280px] mx-auto overflow-hidden glass-effect">
+      <div className="beer-glass-hefeweizen w-full max-w-[120px] h-[280px] mx-auto glass-effect" style={{ position: 'relative' }}>
         {/* Glass shading/highlights */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/10 opacity-50 dark:from-white/20 dark:to-black/20"></div>
         <div className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 to-transparent dark:from-white/10"></div>
         
         {/* Beer fill with dynamic height */}
         <div 
-          className="beer-fill absolute bottom-0 left-0 right-0"
+          className="beer-fill"
           style={{ 
-            height: `${fillPercentage}%` 
+            height: `${fillPercentage}%`,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0
           }}
         >
-          <div className="beer-bubbles absolute inset-0" ref={bubbleRef}></div>
+          <div className="beer-bubbles" ref={bubbleRef} style={{ position: 'absolute', inset: 0 }}></div>
           
           {/* Foam */}
           {count > 0 && (
             <div 
-              className="beer-foam absolute left-0 right-0"
-              style={{ bottom: '98%' }}
+              className="beer-foam"
+              style={{ 
+                bottom: '98%',
+                position: 'absolute',
+                left: 0,
+                right: 0
+              }}
             ></div>
           )}
         </div>
