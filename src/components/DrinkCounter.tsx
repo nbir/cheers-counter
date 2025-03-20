@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Minus, AlertTriangle, Beer, Waves, Droplet } from "lucide-react";
+
+import React, { useState } from "react";
+import { Plus, Minus, AlertTriangle, Beer, Droplet, Waves } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
@@ -18,14 +19,6 @@ import {
 const DrinkCounter: React.FC = () => {
   const maxCount = 12;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showSpill, setShowSpill] = useState<boolean>(() => {
-    try {
-      const savedSpill = localStorage.getItem('showSpill');
-      return savedSpill !== null ? JSON.parse(savedSpill) : true;
-    } catch (error) {
-      return true;
-    }
-  });
   
   const { 
     count, 
@@ -36,14 +29,6 @@ const DrinkCounter: React.FC = () => {
   } = useDrinkStorage();
   
   const todayCount = getTodaysDrinkCount();
-  
-  useEffect(() => {
-    try {
-      localStorage.setItem('showSpill', JSON.stringify(showSpill));
-    } catch (error) {
-      console.error('Error saving spill preference to localStorage:', error);
-    }
-  }, [showSpill]);
   
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
@@ -100,7 +85,7 @@ const DrinkCounter: React.FC = () => {
         </button>
         
         <div className="flex-1 flex justify-center py-4">
-          <BeerGlass count={todayCount} maxCount={maxCount} showSpill={showSpill} />
+          <BeerGlass count={todayCount} maxCount={maxCount} />
         </div>
         
         <button 
@@ -122,27 +107,6 @@ const DrinkCounter: React.FC = () => {
           </p>
         )}
       </div>
-      
-      {todayCount >= 8 && (
-        <div className="mb-6 flex justify-center">
-          <button
-            onClick={() => setShowSpill(!showSpill)}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-md text-sm font-medium transition-colors hover:bg-amber-200 dark:hover:bg-amber-900/50"
-          >
-            {showSpill ? (
-              <>
-                <Droplet size={16} />
-                <span>Hide Spill</span>
-              </>
-            ) : (
-              <>
-                <Waves size={16} />
-                <span>Show Spill</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
       
       <DrinkHistoryTable drinkSummary={drinkSummary} />
       

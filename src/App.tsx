@@ -8,7 +8,6 @@ import MyData from "./pages/MyData";
 import DateDetail from "./pages/DateDetail";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
-import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
 
@@ -16,7 +15,6 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <TooltipProvider>
-        <Toaster position="top-center" className="pt-16" />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />

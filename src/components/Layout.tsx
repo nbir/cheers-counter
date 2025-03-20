@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Link } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Droplet, Waves } from "lucide-react";
 import { useTheme } from "next-themes";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -48,7 +49,67 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
+const SpillToggle: React.FC = () => {
+  const [showSpill, setShowSpill] = useState<boolean>(() => {
+    try {
+      const savedSpill = localStorage.getItem('showSpill');
+      return savedSpill !== null ? JSON.parse(savedSpill) : true;
+    } catch (error) {
+      return true;
+    }
+  });
+  
+  const [mounted, setMounted] = React.useState(false);
+
+  // Wait for component to mount to avoid hydration issues
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  useEffect(() => {
+    if (mounted) {
+      try {
+        localStorage.setItem('showSpill', JSON.stringify(showSpill));
+      } catch (error) {
+        console.error('Error saving spill preference to localStorage:', error);
+      }
+    }
+  }, [showSpill, mounted]);
+
+  const toggleSpill = () => {
+    setShowSpill(!showSpill);
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <button 
+      onClick={toggleSpill}
+      className="flex items-center gap-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+      aria-label={showSpill ? 'Hide spill effect' : 'Show spill effect'}
+    >
+      {showSpill ? (
+        <Droplet size={16} className="text-gray-400" />
+      ) : (
+        <Waves size={16} className="text-gray-400" />
+      )}
+      <span className="text-sm">{showSpill ? 'Hide Spill' : 'Show Spill'}</span>
+    </button>
+  );
+};
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Wait for the localStorage to be accessible
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800); // Match the delay from useDrinkStorage
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 flex flex-col pt-16">
@@ -59,19 +120,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-900/10 dark:to-transparent pointer-events-none" />
         
         {/* Add Toaster component for notifications */}
-        <Toaster position="top-center" className="pt-12" />
+        <Toaster position="top-center" className="pt-16" />
         
         {/* Main content */}
         <main className="flex-1 flex flex-col items-center justify-center p-6">
           <div className="w-full max-w-md mx-auto">
-            {children}
+            {isLoading ? (
+              <div className="space-y-6 w-full">
+                <Skeleton className="h-12 w-40 mx-auto mb-8" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-14 w-14 rounded-full" />
+                  <Skeleton className="h-64 w-28 mx-auto" />
+                  <Skeleton className="h-14 w-14 rounded-full" />
+                </div>
+                <Skeleton className="h-6 w-40 mx-auto mt-4" />
+                <Skeleton className="h-64 w-full mt-8" />
+              </div>
+            ) : (
+              children
+            )}
           </div>
         </main>
         
         {/* Footer with theme toggle, subtle branding and links */}
         <footer className="py-6 px-4 text-center text-sm text-gray-400 dark:text-gray-500">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center gap-6 mb-4">
             <ThemeToggle />
+            <SpillToggle />
           </div>
           <p>BeerMeTwice • Drink Responsibly</p>
           <div className="mt-2 flex justify-center space-x-4">
