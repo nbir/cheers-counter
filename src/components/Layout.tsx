@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Link } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { Moon, Sun, Droplet, Waves, BeerIcon, Wine, Cup } from "lucide-react";
+import { Moon, Sun, Droplet, Waves, BeerIcon, Wine, Coffee } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -161,7 +162,7 @@ const GlassShapeToggle: React.FC = () => {
         className="flex gap-1"
       >
         <ToggleGroupItem value="modern" aria-label="Modern glass style" className="px-2 py-1.5 text-xs">
-          <Cup size={14} className="mr-1" />
+          <Coffee size={14} className="mr-1" />
           Modern
         </ToggleGroupItem>
         <ToggleGroupItem value="hefeweizen" aria-label="Hefeweizen glass style" className="px-2 py-1.5 text-xs">
