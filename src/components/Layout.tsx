@@ -1,11 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Link } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { Moon, Sun, Droplet, Waves } from "lucide-react";
+import { Moon, Sun, Droplet, Waves, BeerIcon, Wine, Cup } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { GlassShape, GLASS_SHAPE_EVENT } from "./BeerGlass";
 
 // Create a global event for spill toggle changes
 export const SPILL_TOGGLE_EVENT = "spillToggleChange";
@@ -107,6 +108,75 @@ const SpillToggle: React.FC = () => {
   );
 };
 
+const GlassShapeToggle: React.FC = () => {
+  const [glassShape, setGlassShape] = useState<GlassShape>(() => {
+    try {
+      const savedShape = localStorage.getItem('glassShape');
+      return savedShape !== null && ['modern', 'hefeweizen', 'nonic'].includes(savedShape) 
+        ? (savedShape as GlassShape) 
+        : 'nonic'; // Default to nonic
+    } catch (error) {
+      return 'nonic';
+    }
+  });
+  
+  const [mounted, setMounted] = React.useState(false);
+
+  // Wait for component to mount to avoid hydration issues
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  useEffect(() => {
+    if (mounted) {
+      try {
+        localStorage.setItem('glassShape', glassShape);
+        
+        // Dispatch a custom event when the toggle changes
+        const event = new CustomEvent(GLASS_SHAPE_EVENT, { 
+          detail: { shape: glassShape } 
+        });
+        window.dispatchEvent(event);
+      } catch (error) {
+        console.error('Error saving glass shape preference to localStorage:', error);
+      }
+    }
+  }, [glassShape, mounted]);
+
+  const updateGlassShape = (value: string) => {
+    if (value && ['modern', 'hefeweizen', 'nonic'].includes(value)) {
+      setGlassShape(value as GlassShape);
+    }
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-sm text-gray-400">Glass Style</span>
+      <ToggleGroup 
+        type="single" 
+        value={glassShape}
+        onValueChange={updateGlassShape}
+        className="flex gap-1"
+      >
+        <ToggleGroupItem value="modern" aria-label="Modern glass style" className="px-2 py-1.5 text-xs">
+          <Cup size={14} className="mr-1" />
+          Modern
+        </ToggleGroupItem>
+        <ToggleGroupItem value="hefeweizen" aria-label="Hefeweizen glass style" className="px-2 py-1.5 text-xs">
+          <Wine size={14} className="mr-1" />
+          Hefeweizen
+        </ToggleGroupItem>
+        <ToggleGroupItem value="nonic" aria-label="Nonic glass style" className="px-2 py-1.5 text-xs">
+          <BeerIcon size={14} className="mr-1" />
+          Nonic
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
+  );
+};
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   
@@ -153,9 +223,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         {/* Footer with theme toggle, subtle branding and links */}
         <footer className="py-6 px-4 text-center text-sm text-gray-400 dark:text-gray-500">
-          <div className="flex justify-center gap-6 mb-4">
-            <ThemeToggle />
-            <SpillToggle />
+          <div className="flex flex-col items-center justify-center gap-6 mb-4">
+            <div className="flex justify-center gap-6">
+              <ThemeToggle />
+              <SpillToggle />
+            </div>
+            <GlassShapeToggle />
           </div>
           <p>BeerMeTwice • Drink Responsibly</p>
           <div className="mt-2 flex justify-center space-x-4">

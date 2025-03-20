@@ -2,6 +2,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SPILL_TOGGLE_EVENT } from "./Layout";
 
+// Define the shape types
+export type GlassShape = "modern" | "hefeweizen" | "nonic";
+export const GLASS_SHAPE_EVENT = "glassShapeChange";
+
 interface BeerGlassProps {
   count: number;
   maxCount?: number;
@@ -10,20 +14,28 @@ interface BeerGlassProps {
 
 const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill = true }) => {
   const [spillEnabled, setSpillEnabled] = useState<boolean>(true);
+  const [glassShape, setGlassShape] = useState<GlassShape>("nonic");
   // Cap the fill percentage at 100%, but allow count to go higher than maxCount
   const fillPercentage = Math.min(Math.max((Math.min(count, maxCount) / maxCount) * 100, 0), 100);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const spillRef = useRef<HTMLDivElement>(null);
   
-  // Read spillEnabled from localStorage when component mounts
+  // Read settings from localStorage when component mounts
   useEffect(() => {
     try {
+      // Read spill setting
       const savedSpill = localStorage.getItem('showSpill');
       if (savedSpill !== null) {
         setSpillEnabled(JSON.parse(savedSpill));
       }
+      
+      // Read glass shape setting
+      const savedShape = localStorage.getItem('glassShape');
+      if (savedShape !== null && ['modern', 'hefeweizen', 'nonic'].includes(savedShape)) {
+        setGlassShape(savedShape as GlassShape);
+      }
     } catch (error) {
-      console.error('Error reading spill setting from localStorage:', error);
+      console.error('Error reading settings from localStorage:', error);
     }
     
     // Add listener for the custom spill toggle event
@@ -31,10 +43,17 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
       setSpillEnabled(e.detail.showSpill);
     };
     
+    // Add listener for the glass shape change event
+    const handleGlassShapeChange = (e: CustomEvent<{shape: GlassShape}>) => {
+      setGlassShape(e.detail.shape);
+    };
+    
     window.addEventListener(SPILL_TOGGLE_EVENT, handleSpillToggle as EventListener);
+    window.addEventListener(GLASS_SHAPE_EVENT, handleGlassShapeChange as EventListener);
     
     return () => {
       window.removeEventListener(SPILL_TOGGLE_EVENT, handleSpillToggle as EventListener);
+      window.removeEventListener(GLASS_SHAPE_EVENT, handleGlassShapeChange as EventListener);
     };
   }, []);
   
@@ -179,7 +198,7 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
         ></div>
       )}
       
-      <div className="beer-glass-nonic w-full max-w-[120px] h-[280px] mx-auto glass-effect" style={{ position: 'relative' }}>
+      <div className={`beer-glass-${glassShape} w-full max-w-[120px] h-[280px] mx-auto glass-effect`} style={{ position: 'relative' }}>
         {/* Glass shading/highlights */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/10 opacity-50 dark:from-white/20 dark:to-black/20"></div>
         <div className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 to-transparent dark:from-white/10"></div>
