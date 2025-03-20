@@ -72,23 +72,26 @@ We don't support custom domains (yet). If you want to deploy your project under 
 
 ## Build Docker Image
 
-1. Build docker image (locally).
+1. Build docker image (locally) with tag.
 ```
-docker build -t cheers-counter .
+docker build -t nibir/cheers-counter:<tag> .
 ```
 2. Run container to test if the image works. Navigate to [http://localhost:8080](http://localhost:8080).
 ```
-docker run -d -p 8080:80 cheers-counter
+docker run -d -p 8080:80 nibir/cheers-counter:<tag>
 ```
 3. List all running containers with `docker ps -a`. Stop and delete container.
 ```
 docker stop <container-id>
 docker container rm <container-id>
 ```
-4. Tag and push image to Docker Hub.
+4. (Optional) Tag an image.
 ```
-docker tag <image-id> nibir/cheers-counter:<tag-name>
-docker push nibir/cheers-counter:<tagname>
+docker tag <image-id> nibir/cheers-counter:<tag>
+```
+5. Push image to Docker Hub (registry).
+```
+docker push nibir/cheers-counter:<tag>
 ```
 
 ## iOS Development with Capacitor
