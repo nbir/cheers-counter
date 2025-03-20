@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import { Plus, Minus, AlertTriangle, Beer, Moon, Sun } from "lucide-react";
+import { Plus, Minus, AlertTriangle, Beer } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
 import DrinkHistoryTable from "./DrinkHistoryTable";
-import { useTheme } from "next-themes";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,9 +19,7 @@ import {
 const DrinkCounter: React.FC = () => {
   const maxCount = 12;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme, setTheme } = useTheme();
-
+  
   const { 
     count, 
     incrementCount, 
@@ -32,22 +29,26 @@ const DrinkCounter: React.FC = () => {
   } = useDrinkStorage();
   
   const todayCount = getTodaysDrinkCount();
-
-  // Wait for component to mount to avoid hydration issues with theme
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
     
-    // Show different messages based on count
+    // Show different toast messages based on today's count
     if (success) {
-      if (todayCount === 0) {
+      const newCount = todayCount + 1;
+      
+      // Only show toast for specific drink milestones
+      if (newCount === 1) {
         toast("First drink! Cheers! 🍻");
-      } else if (todayCount === 1) {
+      } else if (newCount === 2) {
         toast("Two beers down!");
-      } else if (todayCount === maxCount - 1) {
+      } else if (newCount === 4) {
+        toast("Four beers! Halfway to eight!");
+      } else if (newCount === 8) {
+        toast("Eight beers! That's quite a lot!");
+      } else if (newCount === 10) {
+        toast("Ten beers! Remember to drink water too!");
+      } else if (newCount >= maxCount) {
         toast("That's a lot of beers! Drink responsibly!");
       }
     }
@@ -64,10 +65,6 @@ const DrinkCounter: React.FC = () => {
     setShowConfirmDialog(false);
   };
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
-  
   const drinkSummary = getDailyDrinkSummary();
   
   return (
@@ -88,7 +85,7 @@ const DrinkCounter: React.FC = () => {
           className="counter-btn"
           aria-label="Decrease drink count"
         >
-          <Minus size={24} className={count === 0 ? "text-gray-300" : "text-gray-800"} />
+          <Minus size={24} className={count === 0 ? "text-gray-300 dark:text-gray-600" : "text-gray-800 dark:text-gray-200"} />
         </button>
         
         {/* Beer glass - now with today's count */}
@@ -102,17 +99,17 @@ const DrinkCounter: React.FC = () => {
           className="counter-btn"
           aria-label="Increase drink count"
         >
-          <Plus size={24} className="text-gray-800" />
+          <Plus size={24} className="text-gray-800 dark:text-gray-200" />
         </button>
       </div>
       
       {/* Counter label - showing today's count */}
       <div className="text-center mb-8">
-        <p className="text-lg text-gray-500">
+        <p className="text-lg text-gray-500 dark:text-gray-400">
           {todayCount === 0 ? "No drinks today" : todayCount === 1 ? "1 drink today" : `${todayCount} drinks today`}
         </p>
         {todayCount >= 3 && (
-          <p className="text-sm text-amber-600 mt-1 font-medium">
+          <p className="text-sm text-amber-600 dark:text-amber-500 mt-1 font-medium">
             Remember to drink responsibly
           </p>
         )}
@@ -120,21 +117,6 @@ const DrinkCounter: React.FC = () => {
       
       {/* Drink history table */}
       <DrinkHistoryTable drinkSummary={drinkSummary} />
-
-      {/* Theme toggle button */}
-      {mounted && (
-        <button 
-          onClick={toggleTheme}
-          className="mt-8 flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          {resolvedTheme === 'dark' ? (
-            <Sun size={16} className="text-gray-400" />
-          ) : (
-            <Moon size={16} className="text-gray-400" />
-          )}
-          <span className="text-sm">{resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-        </button>
-      )}
       
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
