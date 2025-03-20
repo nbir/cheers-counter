@@ -126,11 +126,40 @@
   .bubble {
     @apply absolute rounded-full bg-white opacity-70;
   }
+
+  .dark .button-effect {
+    @apply bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700;
+  }
+  
+  .dark .glass-effect {
+    @apply bg-gray-900/30 border-gray-700/30;
+  }
 }
 
-.beer-glass {
+.beer-glass-hefeweizen {
   position: relative;
   overflow: hidden;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  /* Bulge in the middle - hefeweizen shape */
+  clip-path: polygon(
+    0% 0%,                    /* top left */
+    100% 0%,                  /* top right */
+    100% 5%,                  /* narrow neck top right */
+    95% 15%,                  /* start bulge top right */
+    100% 50%,                 /* max bulge right */
+    95% 85%,                  /* end bulge bottom right */
+    100% 95%,                 /* narrow bottom right */
+    100% 100%,                /* bottom right */
+    0% 100%,                  /* bottom left */
+    0% 95%,                   /* narrow bottom left */
+    5% 85%,                   /* end bulge bottom left */
+    0% 50%,                   /* max bulge left */
+    5% 15%,                   /* start bulge top left */
+    0% 5%                     /* narrow neck top left */
+  );
 }
 
 .beer-fill {
@@ -164,4 +193,20 @@
   @apply w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center
          text-2xl md:text-3xl font-semibold text-gray-800 button-effect
          transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-beer;
+}
+
+.dark .counter-btn {
+  @apply text-gray-200;
+}
+
+.shadow-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark .beer-fill {
+  filter: brightness(0.9);
+}
+
+.dark .beer-foam {
+  filter: brightness(0.9);
 }

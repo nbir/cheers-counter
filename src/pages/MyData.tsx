@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
-import { ArrowLeft, Trash2, AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Trash2, AlertTriangle, ExternalLink } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -35,7 +35,8 @@ const MyData: React.FC = () => {
     getDailyDrinkSummary,
     getMonthlyDrinkSummary,
     deleteDrinksByDate,
-    deleteDrinksByMonth
+    deleteDrinksByMonth,
+    getDateForUrl
   } = useDrinkStorage();
   
   const dailySummary = getDailyDrinkSummary();
@@ -76,17 +77,17 @@ const MyData: React.FC = () => {
   };
   
   return (
-    <div className="container max-w-md mx-auto pt-12 px-4">
+    <div className="container max-w-md mx-auto pt-16 px-4">
       {/* Back button */}
       <div className="mb-6">
-        <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+        <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
           <ArrowLeft size={20} />
           <span>Back to Home</span>
         </Link>
       </div>
       
       {/* Page title */}
-      <h1 className="text-3xl font-bold mb-6 text-center">My Drink Data</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center dark:text-white">My Drink Data</h1>
       
       {/* Toggle between date and month view */}
       <div className="flex justify-center mb-6">
@@ -97,7 +98,7 @@ const MyData: React.FC = () => {
       </div>
       
       {/* Data table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-hidden dark:border-gray-700">
         <Table>
           <TableHeader>
             <TableRow>
@@ -111,7 +112,15 @@ const MyData: React.FC = () => {
               dailySummary.length > 0 ? (
                 dailySummary.map((day) => (
                   <TableRow key={day.date}>
-                    <TableCell>{formatDate(day.date)}</TableCell>
+                    <TableCell>
+                      <Link 
+                        to={`/my-data/${getDateForUrl(day.date)}`}
+                        className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      >
+                        {formatDate(day.date)}
+                        <ExternalLink size={14} className="inline-block ml-1 opacity-60" />
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {day.totalDrinks}
                     </TableCell>
@@ -119,7 +128,7 @@ const MyData: React.FC = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                         onClick={() => handleDeleteClick("date", day.date)}
                       >
                         <Trash2 size={18} />
@@ -130,7 +139,7 @@ const MyData: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={3} className="text-center py-4 text-gray-500 dark:text-gray-400">
                     No data available
                   </TableCell>
                 </TableRow>
@@ -147,7 +156,7 @@ const MyData: React.FC = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                         onClick={() => handleDeleteClick("month", month.month)}
                       >
                         <Trash2 size={18} />
@@ -158,7 +167,7 @@ const MyData: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-4 text-gray-500">
+                  <TableCell colSpan={3} className="text-center py-4 text-gray-500 dark:text-gray-400">
                     No data available
                   </TableCell>
                 </TableRow>

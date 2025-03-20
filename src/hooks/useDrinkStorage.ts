@@ -9,6 +9,7 @@ interface DrinkEntry {
 interface DailyDrinkSummary {
   date: string;      // ISO date string
   totalDrinks: number;
+  entries?: DrinkEntry[]; // Added for date details page
 }
 
 interface MonthlyDrinkSummary {
@@ -48,22 +49,22 @@ export function useDrinkStorage() {
     }
   }, [count, drinkHistory]);
   
-  // Function to increment drink count
+  // Function to increment drink count, removing the maxCount limit
   const incrementCount = (maxCount: number) => {
-    if (count < maxCount) {
-      const newCount = count + 1;
-      setCount(newCount);
-      
-      // Add entry to history
-      const newEntry: DrinkEntry = {
-        timestamp: Date.now(),
-        count: newCount,
-      };
-      
-      setDrinkHistory(prev => [...prev, newEntry]);
-    }
+    // Keep the maxCount parameter for backward compatibility, but don't use it to limit
+    const newCount = count + 1;
+    setCount(newCount);
     
-    return count < maxCount;
+    // Add entry to history
+    const newEntry: DrinkEntry = {
+      timestamp: Date.now(),
+      count: newCount,
+    };
+    
+    setDrinkHistory(prev => [...prev, newEntry]);
+    
+    // Return true - we now always allow incrementing past maxCount
+    return true;
   };
   
   // Function to decrement drink count
@@ -100,6 +101,7 @@ export function useDrinkStorage() {
   const getDailyDrinkSummary = (): DailyDrinkSummary[] => {
     // Create a map to store drinks per day
     const dailyDrinks = new Map<string, number>();
+    const entriesByDay = new Map<string, DrinkEntry[]>();
     
     // Get the current date and time
     const now = new Date();
@@ -116,6 +118,12 @@ export function useDrinkStorage() {
       if (entryDate >= thirtyDaysAgo) {
         const day = getAdjustedDay(entry.timestamp);
         
+        // Store entries by day for detailed view
+        if (!entriesByDay.has(day)) {
+          entriesByDay.set(day, []);
+        }
+        entriesByDay.get(day)!.push(entry);
+        
         // If this is the first entry or if it's an entry with a different count than the previous
         if (index === 0 || entry.count !== drinkHistory[index - 1]?.count) {
           const countChange = index === 0 
@@ -130,7 +138,11 @@ export function useDrinkStorage() {
     
     // Convert map to array and filter out days with 0 drinks
     const summaryArray = Array.from(dailyDrinks.entries())
-      .map(([date, drinks]) => ({ date, totalDrinks: drinks }))
+      .map(([date, drinks]) => ({ 
+        date, 
+        totalDrinks: drinks,
+        entries: entriesByDay.get(date) 
+      }))
       .filter(day => day.totalDrinks > 0)
       .sort((a, b) => b.date.localeCompare(a.date)); // Sort by date, newest first
     
@@ -161,6 +173,12 @@ export function useDrinkStorage() {
     const dailySummary = getDailyDrinkSummary();
     const todaySummary = dailySummary.find(day => day.date === today);
     return todaySummary ? todaySummary.totalDrinks : 0;
+  };
+  
+  // Get entries for a specific date
+  const getEntriesForDate = (dateStr: string): DrinkEntry[] => {
+    // Filter all entries by the adjusted day
+    return drinkHistory.filter(entry => getAdjustedDay(entry.timestamp) === dateStr);
   };
   
   // Delete drinks for a specific date
@@ -222,6 +240,21 @@ export function useDrinkStorage() {
     }
   };
   
+  // Get date for URL format
+  const getDateForUrl = (date: string): string => {
+    // Convert YYYY-MM-DD to YYYYMMDD
+    return date.replace(/-/g, '');
+  };
+  
+  // Parse URL date to ISO format
+  const parseUrlDate = (urlDate: string): string => {
+    // Convert YYYYMMDD to YYYY-MM-DD
+    if (urlDate.length === 8) {
+      return `${urlDate.substring(0, 4)}-${urlDate.substring(4, 6)}-${urlDate.substring(6, 8)}`;
+    }
+    return urlDate;
+  };
+  
   return {
     count,
     incrementCount,
@@ -231,5 +264,8 @@ export function useDrinkStorage() {
     getTodaysDrinkCount,
     deleteDrinksByDate,
     deleteDrinksByMonth,
+    getEntriesForDate,
+    getDateForUrl,
+    parseUrlDate,
   };
 }

@@ -7,7 +7,8 @@ interface BeerGlassProps {
 }
 
 const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12 }) => {
-  const fillPercentage = Math.min(Math.max((count / maxCount) * 100, 0), 100);
+  // Cap the fill percentage at 100%, but allow count to go higher than maxCount
+  const fillPercentage = Math.min(Math.max((Math.min(count, maxCount) / maxCount) * 100, 0), 100);
   const bubbleRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -60,7 +61,7 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12 }) => {
   }, [count]);
   
   return (
-    <div className="beer-glass relative w-full max-w-[160px] h-[280px] mx-auto rounded-b-2xl rounded-t-3xl overflow-hidden glass-effect">
+    <div className="beer-glass-hefeweizen relative w-full max-w-[120px] h-[280px] mx-auto overflow-hidden glass-effect">
       {/* Glass shading/highlights */}
       <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/10 opacity-50"></div>
       <div className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 to-transparent"></div>

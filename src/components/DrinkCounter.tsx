@@ -1,10 +1,11 @@
 
-import React, { useState } from "react";
-import { Plus, Minus, AlertTriangle, Beer } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, Minus, AlertTriangle, Beer, Moon, Sun } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
 import DrinkHistoryTable from "./DrinkHistoryTable";
+import { useTheme } from "next-themes";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +20,9 @@ import {
 const DrinkCounter: React.FC = () => {
   const maxCount = 12;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+
   const { 
     count, 
     incrementCount, 
@@ -28,23 +32,24 @@ const DrinkCounter: React.FC = () => {
   } = useDrinkStorage();
   
   const todayCount = getTodaysDrinkCount();
+
+  // Wait for component to mount to avoid hydration issues with theme
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
     
     // Show different messages based on count
     if (success) {
-      if (count === 0) {
+      if (todayCount === 0) {
         toast("First drink! Cheers! 🍻");
-      } else if (count === 1) {
+      } else if (todayCount === 1) {
         toast("Two beers down!");
-      } else if (count === maxCount - 1) {
-        toast("Last one! Drink responsibly!");
+      } else if (todayCount === maxCount - 1) {
+        toast("That's a lot of beers! Drink responsibly!");
       }
-    } else {
-      toast("Maybe that's enough for today?", {
-        description: "Remember to drink responsibly"
-      });
     }
   };
   
@@ -57,6 +62,10 @@ const DrinkCounter: React.FC = () => {
   const handleConfirmDecrement = () => {
     decrementCount();
     setShowConfirmDialog(false);
+  };
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
   
   const drinkSummary = getDailyDrinkSummary();
@@ -90,11 +99,10 @@ const DrinkCounter: React.FC = () => {
         {/* Plus button */}
         <button 
           onClick={handleIncrement}
-          disabled={count === maxCount} 
           className="counter-btn"
           aria-label="Increase drink count"
         >
-          <Plus size={24} className={count === maxCount ? "text-gray-300" : "text-gray-800"} />
+          <Plus size={24} className="text-gray-800" />
         </button>
       </div>
       
@@ -112,6 +120,21 @@ const DrinkCounter: React.FC = () => {
       
       {/* Drink history table */}
       <DrinkHistoryTable drinkSummary={drinkSummary} />
+
+      {/* Theme toggle button */}
+      {mounted && (
+        <button 
+          onClick={toggleTheme}
+          className="mt-8 flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          {resolvedTheme === 'dark' ? (
+            <Sun size={16} className="text-gray-400" />
+          ) : (
+            <Moon size={16} className="text-gray-400" />
+          )}
+          <span className="text-sm">{resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
+      )}
       
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>

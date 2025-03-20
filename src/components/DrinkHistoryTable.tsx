@@ -1,6 +1,7 @@
 
 import React from "react";
-import { Calendar } from "lucide-react";
+import { Calendar, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { 
   Table, 
   TableHeader, 
@@ -9,6 +10,7 @@ import {
   TableBody, 
   TableCell 
 } from "@/components/ui/table";
+import { useDrinkStorage } from "@/hooks/useDrinkStorage";
 
 interface DailyDrinkSummary {
   date: string;
@@ -20,6 +22,8 @@ interface DrinkHistoryTableProps {
 }
 
 const DrinkHistoryTable: React.FC<DrinkHistoryTableProps> = ({ drinkSummary }) => {
+  const { getDateForUrl } = useDrinkStorage();
+  
   // Function to format the date in a more readable way
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -32,8 +36,8 @@ const DrinkHistoryTable: React.FC<DrinkHistoryTableProps> = ({ drinkSummary }) =
 
   if (drinkSummary.length === 0) {
     return (
-      <div className="w-full max-w-md mx-auto mt-8 p-4 text-center text-gray-500">
-        <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+      <div className="w-full max-w-md mx-auto mt-8 p-4 text-center text-gray-500 dark:text-gray-400">
+        <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
         <p>No drink history for the last 30 days</p>
       </div>
     );
@@ -41,8 +45,8 @@ const DrinkHistoryTable: React.FC<DrinkHistoryTableProps> = ({ drinkSummary }) =
 
   return (
     <div className="w-full max-w-md mx-auto mt-8">
-      <h2 className="text-xl font-bold mb-4 text-center font-display">Drink History</h2>
-      <div className="border rounded-lg overflow-hidden">
+      <h2 className="text-xl font-bold mb-4 text-center font-display dark:text-white">Drink History</h2>
+      <div className="border rounded-lg overflow-hidden dark:border-gray-700">
         <Table>
           <TableHeader>
             <TableRow>
@@ -53,7 +57,15 @@ const DrinkHistoryTable: React.FC<DrinkHistoryTableProps> = ({ drinkSummary }) =
           <TableBody>
             {drinkSummary.map((day) => (
               <TableRow key={day.date}>
-                <TableCell>{formatDate(day.date)}</TableCell>
+                <TableCell>
+                  <Link 
+                    to={`/my-data/${getDateForUrl(day.date)}`}
+                    className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    {formatDate(day.date)}
+                    <ExternalLink size={14} className="inline-block ml-1 opacity-60" />
+                  </Link>
+                </TableCell>
                 <TableCell className="text-right font-medium">
                   {day.totalDrinks}
                 </TableCell>
