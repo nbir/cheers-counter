@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
+import { SPILL_TOGGLE_EVENT } from "./Layout";
 
 interface BeerGlassProps {
   count: number;
@@ -24,6 +25,17 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
     } catch (error) {
       console.error('Error reading spill setting from localStorage:', error);
     }
+    
+    // Add listener for the custom spill toggle event
+    const handleSpillToggle = (e: CustomEvent<{showSpill: boolean}>) => {
+      setSpillEnabled(e.detail.showSpill);
+    };
+    
+    window.addEventListener(SPILL_TOGGLE_EVENT, handleSpillToggle as EventListener);
+    
+    return () => {
+      window.removeEventListener(SPILL_TOGGLE_EVENT, handleSpillToggle as EventListener);
+    };
   }, []);
   
   // Calculate spill intensity based on count

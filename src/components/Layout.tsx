@@ -7,6 +7,9 @@ import { Moon, Sun, Droplet, Waves } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Create a global event for spill toggle changes
+export const SPILL_TOGGLE_EVENT = "spillToggleChange";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -70,6 +73,12 @@ const SpillToggle: React.FC = () => {
     if (mounted) {
       try {
         localStorage.setItem('showSpill', JSON.stringify(showSpill));
+        
+        // Dispatch a custom event when the toggle changes
+        const event = new CustomEvent(SPILL_TOGGLE_EVENT, { 
+          detail: { showSpill } 
+        });
+        window.dispatchEvent(event);
       } catch (error) {
         console.error('Error saving spill preference to localStorage:', error);
       }
