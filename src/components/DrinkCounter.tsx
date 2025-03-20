@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Plus, Minus, AlertTriangle, Beer } from "lucide-react";
+import { Plus, Minus, AlertTriangle, Beer, Waves, WavesOff } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
@@ -19,6 +19,14 @@ import {
 const DrinkCounter: React.FC = () => {
   const maxCount = 12;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showSpill, setShowSpill] = useState<boolean>(() => {
+    try {
+      const savedSpill = localStorage.getItem('showSpill');
+      return savedSpill !== null ? JSON.parse(savedSpill) : true;
+    } catch (error) {
+      return true;
+    }
+  });
   
   const { 
     count, 
@@ -29,6 +37,15 @@ const DrinkCounter: React.FC = () => {
   } = useDrinkStorage();
   
   const todayCount = getTodaysDrinkCount();
+  
+  // Save spill preference to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('showSpill', JSON.stringify(showSpill));
+    } catch (error) {
+      console.error('Error saving spill preference to localStorage:', error);
+    }
+  }, [showSpill]);
   
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
@@ -90,7 +107,7 @@ const DrinkCounter: React.FC = () => {
         
         {/* Beer glass - now with today's count */}
         <div className="flex-1 flex justify-center py-4">
-          <BeerGlass count={todayCount} maxCount={maxCount} />
+          <BeerGlass count={todayCount} maxCount={maxCount} showSpill={showSpill} />
         </div>
         
         {/* Plus button */}
@@ -114,6 +131,28 @@ const DrinkCounter: React.FC = () => {
           </p>
         )}
       </div>
+      
+      {/* Display spill toggle if today's drinks are >= 8 */}
+      {todayCount >= 8 && (
+        <div className="mb-6 flex justify-center">
+          <button
+            onClick={() => setShowSpill(!showSpill)}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded-md text-sm font-medium transition-colors hover:bg-amber-200 dark:hover:bg-amber-900/50"
+          >
+            {showSpill ? (
+              <>
+                <WavesOff size={16} />
+                <span>Hide Spill</span>
+              </>
+            ) : (
+              <>
+                <Waves size={16} />
+                <span>Show Spill</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
       
       {/* Drink history table */}
       <DrinkHistoryTable drinkSummary={drinkSummary} />

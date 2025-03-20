@@ -17,37 +17,68 @@ interface MonthlyDrinkSummary {
   totalDrinks: number;
 }
 
+// Wrapper functions for localStorage to handle errors gracefully
+const getStorageItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.error(`Error reading ${key} from localStorage:`, error);
+    return null;
+  }
+};
+
+const setStorageItem = (key: string, value: string): boolean => {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    console.error(`Error writing ${key} to localStorage:`, error);
+    return false;
+  }
+};
+
 export function useDrinkStorage() {
   const [count, setCount] = useState<number>(0);
   const [drinkHistory, setDrinkHistory] = useState<DrinkEntry[]>([]);
+  const [isStorageLoaded, setIsStorageLoaded] = useState<boolean>(false);
   
   // Load data from localStorage on component mount
   useEffect(() => {
-    try {
-      const storedCount = localStorage.getItem('currentDrinkCount');
-      const storedHistory = localStorage.getItem('drinkHistory');
-      
-      if (storedCount) {
-        setCount(parseInt(storedCount, 10));
+    // Delay the localStorage access to ensure DOM is fully loaded
+    const timer = setTimeout(() => {
+      try {
+        const storedCount = getStorageItem('currentDrinkCount');
+        const storedHistory = getStorageItem('drinkHistory');
+        
+        if (storedCount) {
+          setCount(parseInt(storedCount, 10));
+        }
+        
+        if (storedHistory) {
+          setDrinkHistory(JSON.parse(storedHistory));
+        }
+        
+        setIsStorageLoaded(true);
+      } catch (error) {
+        console.error('Error loading from localStorage:', error);
+        setIsStorageLoaded(true); // Still mark as loaded even on error
       }
-      
-      if (storedHistory) {
-        setDrinkHistory(JSON.parse(storedHistory));
-      }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
-    }
+    }, 500); // Short delay to ensure DOM is ready
+    
+    return () => clearTimeout(timer);
   }, []);
   
-  // Save data to localStorage whenever it changes
+  // Save data to localStorage whenever it changes, but only after initial load
   useEffect(() => {
-    try {
-      localStorage.setItem('currentDrinkCount', count.toString());
-      localStorage.setItem('drinkHistory', JSON.stringify(drinkHistory));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+    if (isStorageLoaded) {
+      try {
+        setStorageItem('currentDrinkCount', count.toString());
+        setStorageItem('drinkHistory', JSON.stringify(drinkHistory));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
     }
-  }, [count, drinkHistory]);
+  }, [count, drinkHistory, isStorageLoaded]);
   
   // Function to increment drink count, removing the maxCount limit
   const incrementCount = (maxCount: number) => {

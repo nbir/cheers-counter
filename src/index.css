@@ -136,29 +136,30 @@
   }
 }
 
-.beer-glass-hefeweizen {
+/* Nonic pint glass shape */
+.beer-glass-nonic {
   position: relative;
   overflow: hidden;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  border-bottom-left-radius: 32px;
-  border-bottom-right-radius: 32px;
-  /* Bulge in the middle - hefeweizen shape */
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  /* Nonic pint shape with characteristic bulge near the bottom */
   clip-path: polygon(
     0% 0%,                    /* top left */
     100% 0%,                  /* top right */
-    100% 5%,                  /* narrow neck top right */
-    95% 15%,                  /* start bulge top right */
-    100% 50%,                 /* max bulge right */
-    95% 85%,                  /* end bulge bottom right */
-    100% 95%,                 /* narrow bottom right */
-    100% 100%,                /* bottom right */
-    0% 100%,                  /* bottom left */
-    0% 95%,                   /* narrow bottom left */
-    5% 85%,                   /* end bulge bottom left */
-    0% 50%,                   /* max bulge left */
-    5% 15%,                   /* start bulge top left */
-    0% 5%                     /* narrow neck top left */
+    100% 5%,                  /* slight narrowing at top */
+    98% 5%,                   /* slight narrowing at top */
+    97% 67%,                  /* straight side to bulge */
+    100% 75%,                 /* max bulge right */
+    97% 83%,                  /* end bulge */
+    97% 100%,                 /* bottom right */
+    3% 100%,                  /* bottom left */
+    3% 83%,                   /* start bulge left */
+    0% 75%,                   /* max bulge left */
+    3% 67%,                   /* straight side to bulge */
+    2% 5%,                    /* slight narrowing at top */
+    0% 5%                     /* slight narrowing at top */
   );
 }
 
@@ -209,4 +210,66 @@
 
 .dark .beer-foam {
   filter: brightness(0.9);
+}
+
+/* Animation for the spill bubbles */
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-15px) translateX(5px) scale(1.05);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.6;
+  }
+}
+
+/* Animation for bubbles in the beer */
+@keyframes bubble-rise-small {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes bubble-rise-medium {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-120px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes bubble-rise-large {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-150px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-bubble-small {
+  animation: bubble-rise-small 4s ease-in forwards;
+}
+
+.animate-bubble-medium {
+  animation: bubble-rise-medium 5s ease-in forwards;
+}
+
+.animate-bubble-large {
+  animation: bubble-rise-large 6s ease-in forwards;
 }
