@@ -132,17 +132,17 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
         
         {/* Beer fill with dynamic height */}
         <div 
-          className="beer-fill"
+          className="beer-fill absolute bottom-0 left-0 right-0"
           style={{ 
-            '--fill-height': `${fillPercentage}%` 
-          } as React.CSSProperties}
+            height: `${fillPercentage}%` 
+          }}
         >
-          <div className="beer-bubbles" ref={bubbleRef}></div>
+          <div className="beer-bubbles absolute inset-0" ref={bubbleRef}></div>
           
           {/* Foam */}
           {count > 0 && (
             <div 
-              className="beer-foam" 
+              className="beer-foam absolute left-0 right-0"
               style={{ bottom: '98%' }}
             ></div>
           )}
