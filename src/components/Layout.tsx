@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Link } from "react-router-dom";
@@ -153,8 +152,7 @@ const GlassShapeToggle: React.FC = () => {
   if (!mounted) return null;
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <span className="text-sm text-gray-400">Glass Style</span>
+    <div className="flex flex-col items-center">
       <ToggleGroup 
         type="single" 
         value={glassShape}
