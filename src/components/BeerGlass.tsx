@@ -74,16 +74,24 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
       // Don't create spill if intensity is 0
       if (spillIntensity <= 0) return;
       
-      // Number of bubbles based on intensity
-      const numBubbles = Math.floor(10 * spillIntensity) + 5;
+      // Number of bubbles based on intensity - increased for more density
+      const numBubbles = Math.floor(20 * spillIntensity) + 10;
       
       for (let i = 0; i < numBubbles; i++) {
         const bubble = document.createElement("div");
-        const size = Math.floor(Math.random() * 10) + 5;
-        const left = Math.floor(Math.random() * 100);
-        const top = Math.floor(Math.random() * 100);
-        const opacity = Math.random() * 0.4 + 0.3;
-        const animDuration = (Math.random() * 5 + 5) * (1 / spillIntensity);
+        // Increased bubble size range for bigger bubbles
+        const size = Math.floor(Math.random() * 15) + 8;
+        
+        // Concentrate bubbles near the rim of the glass
+        // Position bubbles to appear as if they're coming from the glass rim
+        const distFromCenter = Math.random() * 60 - 30; // -30 to +30
+        const left = 50 + distFromCenter; // Position relative to center
+        
+        // Vertical position - start near the top of the spill container
+        const top = Math.random() * 40 + 60; // 60-100% from the top
+        
+        const opacity = Math.random() * 0.5 + 0.4; // Increased opacity
+        const animDuration = (Math.random() * 4 + 3) * (1 / spillIntensity);
         
         bubble.className = "spill-bubble absolute rounded-full";
         bubble.style.width = `${size}px`;
