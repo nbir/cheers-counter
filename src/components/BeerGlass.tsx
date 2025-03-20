@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface BeerGlassProps {
   count: number;
@@ -8,10 +8,23 @@ interface BeerGlassProps {
 }
 
 const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill = true }) => {
+  const [spillEnabled, setSpillEnabled] = useState<boolean>(true);
   // Cap the fill percentage at 100%, but allow count to go higher than maxCount
   const fillPercentage = Math.min(Math.max((Math.min(count, maxCount) / maxCount) * 100, 0), 100);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const spillRef = useRef<HTMLDivElement>(null);
+  
+  // Read spillEnabled from localStorage when component mounts
+  useEffect(() => {
+    try {
+      const savedSpill = localStorage.getItem('showSpill');
+      if (savedSpill !== null) {
+        setSpillEnabled(JSON.parse(savedSpill));
+      }
+    } catch (error) {
+      console.error('Error reading spill setting from localStorage:', error);
+    }
+  }, []);
   
   // Calculate spill intensity based on count
   const getSpillIntensity = () => {
@@ -62,7 +75,7 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
     };
     
     const createSpill = () => {
-      if (!spillRef.current || !showSpill) return;
+      if (!spillRef.current || !spillEnabled || !showSpill) return;
       
       // Clear previous spill bubbles
       while (spillRef.current.firstChild) {
@@ -124,16 +137,26 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
     const bubbleInterval = setInterval(createBubbles, 3000);
     const spillInterval = setInterval(createSpill, 4000);
     
+    // Listen for changes to localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'showSpill' && e.newValue !== null) {
+        setSpillEnabled(JSON.parse(e.newValue));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
     return () => {
       clearInterval(bubbleInterval);
       clearInterval(spillInterval);
+      window.removeEventListener('storage', handleStorageChange);
     };
-  }, [count, showSpill]);
+  }, [count, showSpill, spillEnabled]);
   
   return (
     <div className="relative w-full">
       {/* Spill container - expanded to cover the entire page above the footer */}
-      {showSpill && count >= 8 && (
+      {showSpill && spillEnabled && count >= 8 && (
         <div 
           ref={spillRef}
           className="spill-container fixed top-0 left-0 w-screen h-[calc(100vh-80px)] overflow-hidden pointer-events-none"
