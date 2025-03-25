@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 // Define types for our drink data
 interface DrinkEntry {
-  timestamp: number; // Unix timestamp
+  timestamp: number; // Unix timestamp in UTC
 }
 
 interface DailyDrinkSummary {
@@ -35,6 +35,16 @@ const setStorageItem = (key: string, value: string): boolean => {
     console.error(`Error writing ${key} to localStorage:`, error);
     return false;
   }
+};
+
+// Utility function to convert local date to UTC
+const localToUTC = (localDate: Date): Date => {
+  return new Date(localDate.getTime());
+};
+
+// Utility function to convert UTC date to local
+const utcToLocal = (utcDate: Date): Date => {
+  return new Date(utcDate.getTime());
 };
 
 export function useDrinkStorage() {
@@ -80,7 +90,7 @@ export function useDrinkStorage() {
   
   // Function to increment drink count
   const incrementCount = (maxCount: number) => {
-    // Add entry to history
+    // Add entry to history with current timestamp in UTC
     const newEntry: DrinkEntry = {
       timestamp: Date.now(),
     };
@@ -104,18 +114,21 @@ export function useDrinkStorage() {
   
   // Function to add a drink at a specific date and time
   const addDrinkAtDateTime = (dateTimeStr: string) => {
-    // Parse the date string to a timestamp
-    const timestamp = new Date(dateTimeStr).getTime();
-    const now = new Date().getTime();
+    // Parse the local date string to a Date object
+    const localDate = new Date(dateTimeStr);
+    
+    // Convert to UTC timestamp
+    const utcTimestamp = localDate.getTime();
+    const now = Date.now();
     
     // Don't allow adding drinks in the future
-    if (timestamp > now) {
+    if (utcTimestamp > now) {
       return false;
     }
     
-    // Add new entry
+    // Add new entry with UTC timestamp
     const newEntry: DrinkEntry = {
-      timestamp
+      timestamp: utcTimestamp
     };
     
     // Sort the history by timestamp after adding the new entry
@@ -128,17 +141,18 @@ export function useDrinkStorage() {
   };
   
   // Function to get adjusted date (day starts at 4:01am and ends at 4am)
-  const getAdjustedDay = (timestamp: number): string => {
-    const date = new Date(timestamp);
+  const getAdjustedDay = (utcTimestamp: number): string => {
+    // Convert UTC timestamp to local date for day adjustment
+    const localDate = utcToLocal(new Date(utcTimestamp));
     
     // If time is between 00:00 and 04:00, consider it part of the previous day
-    if (date.getHours() < 4) {
-      const prevDay = new Date(date);
-      prevDay.setDate(date.getDate() - 1);
+    if (localDate.getHours() < 4) {
+      const prevDay = new Date(localDate);
+      prevDay.setDate(localDate.getDate() - 1);
       return prevDay.toISOString().split('T')[0]; // Return YYYY-MM-DD
     }
     
-    return date.toISOString().split('T')[0]; // Return YYYY-MM-DD
+    return localDate.toISOString().split('T')[0]; // Return YYYY-MM-DD
   };
   
   // Get drink summary for the last 30 days

@@ -37,19 +37,22 @@ const AddDrink: React.FC = () => {
       return;
     }
     
-    // Combine date and time
+    // Combine date and time into a local datetime
     const [hours, minutes] = time.split(':').map(Number);
-    const dateTime = new Date(date);
-    dateTime.setHours(hours, minutes);
+    
+    // Create a date object in the user's local time zone
+    const localDateTime = new Date(date);
+    localDateTime.setHours(hours, minutes);
     
     // Check if the datetime is in the future
-    if (dateTime > new Date()) {
+    if (localDateTime > new Date()) {
       toast.error("Cannot add drinks in the future");
       return;
     }
     
     // Add the drink at the specified date and time
-    const success = addDrinkAtDateTime(dateTime.toISOString());
+    // addDrinkAtDateTime will handle the conversion to UTC
+    const success = addDrinkAtDateTime(localDateTime.toISOString());
     
     if (success) {
       toast.success("Drink added successfully");

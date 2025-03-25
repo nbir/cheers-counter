@@ -49,6 +49,9 @@ const DateDetail: React.FC = () => {
     }).format(new Date(timestamp));
   };
   
+  // Sort entries by timestamp
+  const sortedEntries = [...entries].sort((a, b) => a.timestamp - b.timestamp);
+  
   return (
     <div className="container max-w-md mx-auto pt-16 px-4">
       {/* Back button */}
@@ -71,16 +74,12 @@ const DateDetail: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Time</TableHead>
-              <TableHead className="text-right">Count</TableHead>
-              <TableHead className="text-right">Change</TableHead>
+              <TableHead className="text-right">Number</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {entries.length > 0 ? (
-              entries.map((entry, index) => {
-                const prevEntry = index > 0 ? entries[index - 1] : null;
-                const change = prevEntry ? entry.count - prevEntry.count : entry.count;
-                
+            {sortedEntries.length > 0 ? (
+              sortedEntries.map((entry, index) => {
                 return (
                   <TableRow key={entry.timestamp}>
                     <TableCell className="flex items-center gap-2">
@@ -88,23 +87,14 @@ const DateDetail: React.FC = () => {
                       {formatTime(entry.timestamp)}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      {entry.count}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className={`inline-flex items-center ${change > 0 ? 'text-green-600 dark:text-green-400' : change < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>
-                        {change > 0 && '+'}
-                        {change}
-                        {change !== 0 && (
-                          <Beer size={14} className="ml-1" />
-                        )}
-                      </span>
+                      #{index + 1}
                     </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                <TableCell colSpan={2} className="text-center py-4 text-gray-500 dark:text-gray-400">
                   No drink entries found for this date
                 </TableCell>
               </TableRow>
@@ -114,16 +104,13 @@ const DateDetail: React.FC = () => {
       </div>
       
       {/* Summary */}
-      {entries.length > 0 && (
+      {sortedEntries.length > 0 && (
         <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
           <h2 className="text-lg font-medium text-blue-800 dark:text-blue-300 mb-2">Summary</h2>
           <p className="text-gray-700 dark:text-gray-300">
             You had a total of{' '}
             <span className="font-bold">
-              {entries.reduce((max, entry, idx, arr) => {
-                // Find the highest count on this day
-                return Math.max(max, entry.count);
-              }, 0)}
+              {sortedEntries.length}
             </span>{' '}
             drinks on this day.
           </p>
