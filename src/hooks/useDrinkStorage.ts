@@ -148,7 +148,7 @@ export function useDrinkStorage() {
     // If time is between 00:00 and 04:00, consider it part of the previous day
     if (localDate.getHours() < 4) {
       const prevDay = new Date(localDate);
-      prevDay.setDate(localDate.getDate() - 1);
+      prevDay.setDate(prevDay.getDate() - 1);
       return prevDay.toISOString().split('T')[0]; // Return YYYY-MM-DD
     }
     
