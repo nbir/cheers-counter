@@ -36,14 +36,21 @@ const setStorageItem = (key: string, value: string): boolean => {
   }
 };
 
-// Utility function to convert local date to UTC
-const localToUTC = (localDate: Date): Date => {
-  return new Date(localDate.getTime());
-};
-
-// Utility function to convert UTC date to local
-const utcToLocal = (utcDate: Date): Date => {
-  return new Date(utcDate.getTime());
+// Function to convert UTC timestamp to adjusted local date string (YYYY-MM-DD)
+// Day starts at 4:01am and ends at 4:00am the next day
+const getAdjustedDateString = (utcTimestamp: number): string => {
+  // Convert UTC timestamp to local date
+  const localDate = new Date(utcTimestamp);
+  
+  // If local time is between midnight and 4:00 AM, consider it part of the previous day
+  if (localDate.getHours() < 4) {
+    const previousDay = new Date(localDate);
+    previousDay.setDate(localDate.getDate() - 1);
+    return previousDay.toISOString().split('T')[0];
+  }
+  
+  // Otherwise use the current date
+  return localDate.toISOString().split('T')[0];
 };
 
 export function useDrinkStorage() {
@@ -89,9 +96,9 @@ export function useDrinkStorage() {
   
   // Function to increment drink count
   const incrementCount = (maxCount: number) => {
-    // Add entry to history with current timestamp in UTC
+    // Add entry with current UTC timestamp
     const newEntry: DrinkEntry = {
-      timestamp: Date.now(),
+      timestamp: Date.now() // Already in UTC
     };
     
     setDrinkHistory(prev => [...prev, newEntry]);
@@ -116,7 +123,7 @@ export function useDrinkStorage() {
     // Parse the local date string to a Date object
     const localDate = new Date(dateTimeStr);
     
-    // Convert to UTC timestamp
+    // Get timestamp (automatically in UTC)
     const utcTimestamp = localDate.getTime();
     const now = Date.now();
     
@@ -139,23 +146,6 @@ export function useDrinkStorage() {
     return true;
   };
   
-  // Function to get adjusted date (day starts at 4:01am and ends at 4am)
-  const getAdjustedDay = (utcTimestamp: number): string => {
-    // Convert UTC timestamp to local date for day adjustment
-    const localDate = utcToLocal(new Date(utcTimestamp));
-    
-    // If time is between 00:00 and 04:00, consider it part of the previous day
-    if (localDate.getHours() < 4) {
-      // Get yesterday's date
-      const yesterday = new Date(localDate);
-      yesterday.setDate(localDate.getDate() - 1);
-      return yesterday.toISOString().split('T')[0];
-    }
-    
-    // For other hours, return the current date
-    return localDate.toISOString().split('T')[0];
-  };
-  
   // Get drink summary for the last 30 days
   const getDailyDrinkSummary = (): DailyDrinkSummary[] => {
     // Create a map to store drinks per day
@@ -168,14 +158,14 @@ export function useDrinkStorage() {
     // Get the date 30 days ago
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(now.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
     
     // Process history entries to count drinks per day
     drinkHistory.forEach((entry) => {
-      const entryDate = new Date(entry.timestamp);
-      
       // Only consider entries in the last 30 days
-      if (entryDate >= thirtyDaysAgo) {
-        const day = getAdjustedDay(entry.timestamp);
+      if (entry.timestamp >= thirtyDaysAgo.getTime()) {
+        // Get adjusted date string based on 4am boundary
+        const day = getAdjustedDateString(entry.timestamp);
         
         // Store entries by day for detailed view
         if (!entriesByDay.has(day)) {
@@ -221,7 +211,7 @@ export function useDrinkStorage() {
   
   // Get today's drink count
   const getTodaysDrinkCount = (): number => {
-    const today = getAdjustedDay(Date.now());
+    const today = getAdjustedDateString(Date.now());
     const dailySummary = getDailyDrinkSummary();
     const todaySummary = dailySummary.find(day => day.date === today);
     return todaySummary ? todaySummary.totalDrinks : 0;
@@ -230,14 +220,14 @@ export function useDrinkStorage() {
   // Get entries for a specific date
   const getEntriesForDate = (dateStr: string): DrinkEntry[] => {
     // Filter all entries by the adjusted day
-    return drinkHistory.filter(entry => getAdjustedDay(entry.timestamp) === dateStr);
+    return drinkHistory.filter(entry => getAdjustedDateString(entry.timestamp) === dateStr);
   };
   
   // Delete drinks for a specific date
   const deleteDrinksByDate = (dateToDelete: string): void => {
     // We need to identify all entries that belong to this date and remove them
     setDrinkHistory(prev => 
-      prev.filter(entry => getAdjustedDay(entry.timestamp) !== dateToDelete)
+      prev.filter(entry => getAdjustedDateString(entry.timestamp) !== dateToDelete)
     );
   };
   
@@ -245,7 +235,7 @@ export function useDrinkStorage() {
   const deleteDrinksByMonth = (monthToDelete: string): void => {
     // Filter out entries from the specified month
     setDrinkHistory(prev => 
-      prev.filter(entry => !getAdjustedDay(entry.timestamp).startsWith(monthToDelete))
+      prev.filter(entry => !getAdjustedDateString(entry.timestamp).startsWith(monthToDelete))
     );
   };
   
@@ -277,6 +267,6 @@ export function useDrinkStorage() {
     getEntriesForDate,
     getDateForUrl,
     parseUrlDate,
-    getAdjustedDay
+    getAdjustedDateString
   };
 }

@@ -51,7 +51,7 @@ const AddDrink: React.FC = () => {
     }
     
     // Add the drink at the specified date and time
-    // addDrinkAtDateTime will handle the conversion to UTC
+    // The ISO string will be converted to a timestamp in UTC
     const success = addDrinkAtDateTime(localDateTime.toISOString());
     
     if (success) {
