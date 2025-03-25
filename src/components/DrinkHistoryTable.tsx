@@ -26,7 +26,7 @@ const DrinkHistoryTable: React.FC<DrinkHistoryTableProps> = ({ drinkSummary }) =
   
   // Function to format the date in a more readable way
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
+    const date = new Date(dateString + "T00:00:00");
     return new Intl.DateTimeFormat('en-US', { 
       weekday: 'short',
       month: 'short', 
