@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import MyData from "./pages/MyData";
+import AddDrink from "./pages/AddDrink";
 import DateDetail from "./pages/DateDetail";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -20,6 +21,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/my-data" element={<MyData />} />
             <Route path="/my-data/:dateId" element={<DateDetail />} />
+            <Route path="/add-drink" element={<AddDrink />} />
             <Route path="/privacy" element={<Privacy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

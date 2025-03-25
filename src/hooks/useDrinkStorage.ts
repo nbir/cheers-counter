@@ -80,7 +80,7 @@ export function useDrinkStorage() {
     }
   }, [count, drinkHistory, isStorageLoaded]);
   
-  // Function to increment drink count, removing the maxCount limit
+  // Function to increment drink count
   const incrementCount = (maxCount: number) => {
     // Keep the maxCount parameter for backward compatibility, but don't use it to limit
     const newCount = count + 1;
@@ -116,13 +116,71 @@ export function useDrinkStorage() {
     return count > 0;
   };
   
+  // Function to add a drink at a specific date and time
+  const addDrinkAtDateTime = (dateTimeStr: string) => {
+    // Parse the date string to a timestamp
+    const timestamp = new Date(dateTimeStr).getTime();
+    const now = new Date().getTime();
+    
+    // Don't allow adding drinks in the future
+    if (timestamp > now) {
+      return false;
+    }
+    
+    // Find where to insert the new entry in the history (chronological order)
+    let insertIndex = drinkHistory.findIndex(entry => entry.timestamp > timestamp);
+    if (insertIndex === -1) insertIndex = drinkHistory.length;
+    
+    // Calculate the correct count for this entry
+    let previousCount = 0;
+    if (insertIndex > 0) {
+      previousCount = drinkHistory[insertIndex - 1].count;
+    }
+    
+    // New entry to add
+    const newEntry: DrinkEntry = {
+      timestamp,
+      count: previousCount + 1
+    };
+    
+    // Insert the new entry
+    const updatedHistory = [
+      ...drinkHistory.slice(0, insertIndex),
+      newEntry,
+      ...drinkHistory.slice(insertIndex)
+    ];
+    
+    // Adjust counts for all subsequent entries
+    for (let i = insertIndex + 1; i < updatedHistory.length; i++) {
+      updatedHistory[i] = {
+        ...updatedHistory[i],
+        count: updatedHistory[i].count + 1
+      };
+    }
+    
+    // Update state
+    setDrinkHistory(updatedHistory);
+    
+    // If the new entry is the last one, also update the current count
+    if (insertIndex === drinkHistory.length) {
+      setCount(newEntry.count);
+    } else {
+      // Otherwise, set the count to the last entry's count
+      setCount(updatedHistory[updatedHistory.length - 1].count);
+    }
+    
+    return true;
+  };
+  
   // Function to get adjusted date (day starts at 4:01am and ends at 4am)
   const getAdjustedDay = (timestamp: number): string => {
     const date = new Date(timestamp);
     
     // If time is between 00:00 and 04:00, consider it part of the previous day
     if (date.getHours() < 4) {
-      date.setDate(date.getDate() - 1);
+      const prevDay = new Date(date);
+      prevDay.setDate(date.getDate() - 1);
+      return prevDay.toISOString().split('T')[0]; // Return YYYY-MM-DD
     }
     
     return date.toISOString().split('T')[0]; // Return YYYY-MM-DD
@@ -290,6 +348,7 @@ export function useDrinkStorage() {
     count,
     incrementCount,
     decrementCount,
+    addDrinkAtDateTime,
     getDailyDrinkSummary,
     getMonthlyDrinkSummary,
     getTodaysDrinkCount,
@@ -298,5 +357,6 @@ export function useDrinkStorage() {
     getEntriesForDate,
     getDateForUrl,
     parseUrlDate,
+    getAdjustedDay
   };
 }

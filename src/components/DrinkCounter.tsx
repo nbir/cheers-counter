@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Minus, AlertTriangle, Beer, Droplet, Waves } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
@@ -28,13 +28,19 @@ const DrinkCounter: React.FC = () => {
     getTodaysDrinkCount 
   } = useDrinkStorage();
   
-  const todayCount = getTodaysDrinkCount();
+  const [todayCount, setTodayCount] = useState(0);
+  
+  // Update todayCount whenever count changes or component mounts
+  useEffect(() => {
+    setTodayCount(getTodaysDrinkCount());
+  }, [count, getTodaysDrinkCount]);
   
   const handleIncrement = () => {
     const success = incrementCount(maxCount);
     
     if (success) {
       const newCount = todayCount + 1;
+      setTodayCount(newCount);
       
       if (newCount === 1) {
         toast("First drink! Cheers! 🍻");
@@ -60,6 +66,7 @@ const DrinkCounter: React.FC = () => {
   
   const handleConfirmDecrement = () => {
     decrementCount();
+    setTodayCount(prev => Math.max(0, prev - 1));
     setShowConfirmDialog(false);
   };
 
