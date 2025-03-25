@@ -146,15 +146,13 @@ export function useDrinkStorage() {
     
     // If time is between 00:00 and 04:00, consider it part of the previous day
     if (localDate.getHours() < 4) {
-      // Create a new date object by cloning localDate
-      const prevDay = new Date(localDate.getTime());
-      // Subtract one day from the date
-      prevDay.setDate(prevDay.getDate() - 1);
-      // Return the date in YYYY-MM-DD format
-      return prevDay.toISOString().split('T')[0];
+      // Get yesterday's date
+      const yesterday = new Date(localDate);
+      yesterday.setDate(localDate.getDate() - 1);
+      return yesterday.toISOString().split('T')[0];
     }
     
-    // For other hours, return the current date in YYYY-MM-DD format
+    // For other hours, return the current date
     return localDate.toISOString().split('T')[0];
   };
   
