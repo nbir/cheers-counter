@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 // Define types for our drink data
@@ -147,12 +146,16 @@ export function useDrinkStorage() {
     
     // If time is between 00:00 and 04:00, consider it part of the previous day
     if (localDate.getHours() < 4) {
-      const prevDay = new Date(localDate);
+      // Create a new date object by cloning localDate
+      const prevDay = new Date(localDate.getTime());
+      // Subtract one day from the date
       prevDay.setDate(prevDay.getDate() - 1);
-      return prevDay.toISOString().split('T')[0]; // Return YYYY-MM-DD
+      // Return the date in YYYY-MM-DD format
+      return prevDay.toISOString().split('T')[0];
     }
     
-    return localDate.toISOString().split('T')[0]; // Return YYYY-MM-DD
+    // For other hours, return the current date in YYYY-MM-DD format
+    return localDate.toISOString().split('T')[0];
   };
   
   // Get drink summary for the last 30 days
