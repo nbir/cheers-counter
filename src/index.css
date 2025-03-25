@@ -135,22 +135,26 @@
   }
 }
 
-/* Modern glass shape - straight simple pint glass */
-.beer-glass-modern {
+/* Tulip glass shape - replaces Modern */
+.beer-glass-tulip {
   position: relative;
   overflow: hidden;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  /* Modern pint glass with slightly tapered design */
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  /* Tulip glass with wider top, narrow middle, and wider bottom */
   clip-path: polygon(
     0% 0%,                    /* top left */
     100% 0%,                  /* top right */
-    97% 5%,                   /* slight narrowing at top */
-    97% 100%,                 /* bottom right */
-    3% 100%,                  /* bottom left */
-    3% 5%                     /* slight narrowing at top */
+    90% 10%,                  /* narrowing from top */
+    80% 35%,                  /* narrowest point */
+    95% 80%,                  /* widening towards bottom */
+    95% 100%,                 /* bottom right */
+    5% 100%,                  /* bottom left */
+    5% 80%,                   /* widening towards bottom */
+    20% 35%,                  /* narrowest point */
+    10% 10%                   /* narrowing from top */
   );
 }
 
@@ -313,3 +317,4 @@
 .animate-bubble-large {
   animation: bubble-rise-large 6s ease-in forwards;
 }
+

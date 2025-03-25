@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { SPILL_TOGGLE_EVENT } from "./Layout";
 
 // Define the shape types
-export type GlassShape = "modern" | "hefeweizen" | "nonic";
+export type GlassShape = "tulip" | "hefeweizen" | "nonic";
 export const GLASS_SHAPE_EVENT = "glassShapeChange";
 
 interface BeerGlassProps {
@@ -31,8 +31,14 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
       
       // Read glass shape setting
       const savedShape = localStorage.getItem('glassShape');
-      if (savedShape !== null && ['modern', 'hefeweizen', 'nonic'].includes(savedShape)) {
-        setGlassShape(savedShape as GlassShape);
+      if (savedShape !== null) {
+        // Migrate "modern" to "tulip"
+        if (savedShape === "modern") {
+          localStorage.setItem('glassShape', "tulip");
+          setGlassShape("tulip");
+        } else if (['tulip', 'hefeweizen', 'nonic'].includes(savedShape)) {
+          setGlassShape(savedShape as GlassShape);
+        }
       }
     } catch (error) {
       console.error('Error reading settings from localStorage:', error);
@@ -119,7 +125,7 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
       if (spillIntensity <= 0) return;
       
       // Significantly increased number of bubbles to fill the entire page
-      const numBubbles = Math.floor(100 * spillIntensity) + 50;
+      const numBubbles = Math.floor(120 * spillIntensity) + 60;
       
       for (let i = 0; i < numBubbles; i++) {
         const bubble = document.createElement("div");
@@ -127,31 +133,21 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
         // Create varying sizes of bubbles
         const size = Math.floor(Math.random() * 20) + 5;
         
-        // Calculate distance from center (0 = at center, 1 = far away)
-        // Use an exponential distribution to make more bubbles appear near the glass
-        const distanceFromCenter = Math.pow(Math.random(), 2);
+        // Random position across the whole page
+        const left = Math.random() * 100; // 0% to 100% from left
+        const top = Math.random() * 100;  // 0% to 100% from top
         
-        // Convert to position on screen (central area is around the glass)
-        const horizontalSpread = 100; // How wide the bubbles spread horizontally
-        const distFromCenter = (Math.random() * 2 - 1) * horizontalSpread * distanceFromCenter;
-        const left = 50 + distFromCenter; // Position relative to center
+        // Bubble opacity varies randomly
+        const opacity = Math.max(0.1, 0.8 - (Math.random() * 0.5));
         
-        // Vertical position - spread throughout the container 
-        // Closer to center = lower position (above the glass)
-        // Further from center = higher position (top of page)
-        const verticalPosition = 20 + (80 * distanceFromCenter); // 20-100% from the top
-        
-        // Bubble opacity decreases as distance increases
-        const opacity = Math.max(0.1, 0.8 - (distanceFromCenter * 0.6));
-        
-        // Animation duration varies - closer bubbles rise faster
-        const animDuration = (Math.random() * 10 + 5) * (1 + distanceFromCenter);
+        // Animation duration varies randomly
+        const animDuration = Math.random() * 10 + 5;
         
         bubble.className = "spill-bubble absolute rounded-full";
         bubble.style.width = `${size}px`;
         bubble.style.height = `${size}px`;
         bubble.style.left = `${left}%`;
-        bubble.style.top = `${verticalPosition}%`;
+        bubble.style.top = `${top}%`;
         bubble.style.opacity = `${opacity}`;
         bubble.style.backgroundColor = "rgba(255, 220, 150, 0.7)";
         bubble.style.boxShadow = "0 0 5px rgba(255, 220, 150, 0.5)";
@@ -186,11 +182,11 @@ const BeerGlass: React.FC<BeerGlassProps> = ({ count, maxCount = 12, showSpill =
   
   return (
     <div className="relative w-full">
-      {/* Spill container - expanded to cover the entire page above the footer */}
+      {/* Spill container - expanded to cover the entire page */}
       {showSpill && spillEnabled && count >= 8 && (
         <div 
           ref={spillRef}
-          className="spill-container fixed top-0 left-0 w-screen h-[calc(100vh-80px)] overflow-hidden pointer-events-none"
+          className="spill-container fixed top-0 left-0 w-screen h-screen overflow-hidden pointer-events-none"
           style={{
             opacity: getSpillIntensity(),
             zIndex: 40 // High enough to be above most content but below header/nav

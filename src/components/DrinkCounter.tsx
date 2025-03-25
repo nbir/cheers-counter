@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Plus, Minus, AlertTriangle, Beer, Droplet, Waves } from "lucide-react";
+import { Plus, Minus, AlertTriangle } from "lucide-react";
 import BeerGlass from "./BeerGlass";
 import { toast } from "sonner";
 import { useDrinkStorage } from "@/hooks/useDrinkStorage";
@@ -74,14 +74,13 @@ const DrinkCounter: React.FC = () => {
   
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-full max-w-md flex items-center justify-between gap-6 mb-8">
+      <div className="w-full max-w-md flex-none flex items-center justify-between gap-6 mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-center mx-auto animate-float font-display flex items-center gap-2">
-          <Beer size={32} className="text-amber-500" />
           <span>BeerMeTwice</span>
         </h1>
       </div>
       
-      <div className="w-full max-w-md flex items-center justify-between px-4 mb-6 gap-4">
+      <div className="w-full max-w-md flex-none flex items-center justify-between px-4 mb-6 gap-4">
         <button 
           onClick={handleDecrementRequest} 
           disabled={count === 0}
@@ -104,7 +103,7 @@ const DrinkCounter: React.FC = () => {
         </button>
       </div>
       
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 flex-none">
         <p className="text-lg text-gray-500 dark:text-gray-400">
           {todayCount === 0 ? "No drinks today" : todayCount === 1 ? "1 drink today" : `${todayCount} drinks today`}
         </p>
@@ -115,7 +114,9 @@ const DrinkCounter: React.FC = () => {
         )}
       </div>
       
-      <DrinkHistoryTable drinkSummary={drinkSummary} />
+      <div className="overflow-y-auto w-full max-h-[calc(100vh-500px)]">
+        <DrinkHistoryTable drinkSummary={drinkSummary} />
+      </div>
       
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>

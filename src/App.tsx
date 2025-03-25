@@ -9,22 +9,23 @@ import AddDrink from "./pages/AddDrink";
 import DateDetail from "./pages/DateDetail";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark">
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/my-data" element={<MyData />} />
-            <Route path="/my-data/:dateId" element={<DateDetail />} />
-            <Route path="/add-drink" element={<AddDrink />} />
-            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/my-data" element={<Layout><MyData /></Layout>} />
+            <Route path="/my-data/:dateId" element={<Layout><DateDetail /></Layout>} />
+            <Route path="/add-drink" element={<Layout><AddDrink /></Layout>} />
+            <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Layout><NotFound /></Layout>} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

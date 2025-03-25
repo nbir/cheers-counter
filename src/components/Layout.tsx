@@ -113,7 +113,12 @@ const GlassShapeToggle: React.FC = () => {
   const [glassShape, setGlassShape] = useState<GlassShape>(() => {
     try {
       const savedShape = localStorage.getItem('glassShape');
-      return savedShape !== null && ['modern', 'hefeweizen', 'nonic'].includes(savedShape) 
+      // Convert "modern" to "tulip" for existing users
+      if (savedShape === "modern") {
+        localStorage.setItem('glassShape', 'tulip');
+        return 'tulip';
+      }
+      return savedShape !== null && ['tulip', 'hefeweizen', 'nonic'].includes(savedShape) 
         ? (savedShape as GlassShape) 
         : 'nonic'; // Default to nonic
     } catch (error) {
@@ -145,7 +150,7 @@ const GlassShapeToggle: React.FC = () => {
   }, [glassShape, mounted]);
 
   const updateGlassShape = (value: string) => {
-    if (value && ['modern', 'hefeweizen', 'nonic'].includes(value)) {
+    if (value && ['tulip', 'hefeweizen', 'nonic'].includes(value)) {
       setGlassShape(value as GlassShape);
     }
   };
@@ -160,9 +165,9 @@ const GlassShapeToggle: React.FC = () => {
         onValueChange={updateGlassShape}
         className="flex gap-1"
       >
-        <ToggleGroupItem value="modern" aria-label="Modern glass style" className="px-2 py-1.5 text-xs">
+        <ToggleGroupItem value="tulip" aria-label="Tulip glass style" className="px-2 py-1.5 text-xs">
           <Coffee size={14} className="mr-1" />
-          Modern
+          Tulip
         </ToggleGroupItem>
         <ToggleGroupItem value="hefeweizen" aria-label="Hefeweizen glass style" className="px-2 py-1.5 text-xs">
           <Wine size={14} className="mr-1" />
@@ -221,7 +226,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </main>
         
-        {/* Footer with toggles and links (removed text line) */}
+        {/* Footer with toggles and links */}
         <footer className="py-6 px-4 text-center text-sm text-gray-400 dark:text-gray-500">
           <div className="flex flex-col items-center justify-center gap-6 mb-4">
             <div className="flex justify-center gap-6">

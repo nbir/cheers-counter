@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
 
 // Define types for our drink data
 interface DrinkEntry {
   timestamp: number; // Unix timestamp
-  count: number;     // Number of drinks at that point
 }
 
 interface DailyDrinkSummary {
@@ -38,7 +38,6 @@ const setStorageItem = (key: string, value: string): boolean => {
 };
 
 export function useDrinkStorage() {
-  const [count, setCount] = useState<number>(0);
   const [drinkHistory, setDrinkHistory] = useState<DrinkEntry[]>([]);
   const [isStorageLoaded, setIsStorageLoaded] = useState<boolean>(false);
   
@@ -47,12 +46,7 @@ export function useDrinkStorage() {
     // Delay the localStorage access to ensure DOM is fully loaded
     const timer = setTimeout(() => {
       try {
-        const storedCount = getStorageItem('currentDrinkCount');
         const storedHistory = getStorageItem('drinkHistory');
-        
-        if (storedCount) {
-          setCount(parseInt(storedCount, 10));
-        }
         
         if (storedHistory) {
           setDrinkHistory(JSON.parse(storedHistory));
@@ -72,48 +66,40 @@ export function useDrinkStorage() {
   useEffect(() => {
     if (isStorageLoaded) {
       try {
-        setStorageItem('currentDrinkCount', count.toString());
         setStorageItem('drinkHistory', JSON.stringify(drinkHistory));
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
     }
-  }, [count, drinkHistory, isStorageLoaded]);
+  }, [drinkHistory, isStorageLoaded]);
+  
+  // Get the current count of drinks from history
+  const getCurrentCount = (): number => {
+    return drinkHistory.length;
+  };
   
   // Function to increment drink count
   const incrementCount = (maxCount: number) => {
-    // Keep the maxCount parameter for backward compatibility, but don't use it to limit
-    const newCount = count + 1;
-    setCount(newCount);
-    
     // Add entry to history
     const newEntry: DrinkEntry = {
       timestamp: Date.now(),
-      count: newCount,
     };
     
     setDrinkHistory(prev => [...prev, newEntry]);
     
-    // Return true - we now always allow incrementing past maxCount
+    // We always allow incrementing past maxCount
     return true;
   };
   
   // Function to decrement drink count
   const decrementCount = () => {
-    if (count > 0) {
-      const newCount = count - 1;
-      setCount(newCount);
-      
-      // Add entry to history
-      const newEntry: DrinkEntry = {
-        timestamp: Date.now(),
-        count: newCount,
-      };
-      
-      setDrinkHistory(prev => [...prev, newEntry]);
+    if (drinkHistory.length > 0) {
+      // Remove the most recent entry
+      setDrinkHistory(prev => prev.slice(0, -1));
+      return true;
     }
     
-    return count > 0;
+    return false;
   };
   
   // Function to add a drink at a specific date and time
@@ -127,47 +113,16 @@ export function useDrinkStorage() {
       return false;
     }
     
-    // Find where to insert the new entry in the history (chronological order)
-    let insertIndex = drinkHistory.findIndex(entry => entry.timestamp > timestamp);
-    if (insertIndex === -1) insertIndex = drinkHistory.length;
-    
-    // Calculate the correct count for this entry
-    let previousCount = 0;
-    if (insertIndex > 0) {
-      previousCount = drinkHistory[insertIndex - 1].count;
-    }
-    
-    // New entry to add
+    // Add new entry
     const newEntry: DrinkEntry = {
-      timestamp,
-      count: previousCount + 1
+      timestamp
     };
     
-    // Insert the new entry
-    const updatedHistory = [
-      ...drinkHistory.slice(0, insertIndex),
-      newEntry,
-      ...drinkHistory.slice(insertIndex)
-    ];
-    
-    // Adjust counts for all subsequent entries
-    for (let i = insertIndex + 1; i < updatedHistory.length; i++) {
-      updatedHistory[i] = {
-        ...updatedHistory[i],
-        count: updatedHistory[i].count + 1
-      };
-    }
+    // Sort the history by timestamp after adding the new entry
+    const updatedHistory = [...drinkHistory, newEntry].sort((a, b) => a.timestamp - b.timestamp);
     
     // Update state
     setDrinkHistory(updatedHistory);
-    
-    // If the new entry is the last one, also update the current count
-    if (insertIndex === drinkHistory.length) {
-      setCount(newEntry.count);
-    } else {
-      // Otherwise, set the count to the last entry's count
-      setCount(updatedHistory[updatedHistory.length - 1].count);
-    }
     
     return true;
   };
@@ -200,7 +155,7 @@ export function useDrinkStorage() {
     thirtyDaysAgo.setDate(now.getDate() - 30);
     
     // Process history entries to count drinks per day
-    drinkHistory.forEach((entry, index) => {
+    drinkHistory.forEach((entry) => {
       const entryDate = new Date(entry.timestamp);
       
       // Only consider entries in the last 30 days
@@ -213,15 +168,8 @@ export function useDrinkStorage() {
         }
         entriesByDay.get(day)!.push(entry);
         
-        // If this is the first entry or if it's an entry with a different count than the previous
-        if (index === 0 || entry.count !== drinkHistory[index - 1]?.count) {
-          const countChange = index === 0 
-            ? entry.count 
-            : entry.count - drinkHistory[index - 1].count;
-          
-          // Increment/decrement the count for the day
-          dailyDrinks.set(day, (dailyDrinks.get(day) || 0) + countChange);
-        }
+        // Increment the count for the day
+        dailyDrinks.set(day, (dailyDrinks.get(day) || 0) + 1);
       }
     });
     
@@ -272,61 +220,18 @@ export function useDrinkStorage() {
   
   // Delete drinks for a specific date
   const deleteDrinksByDate = (dateToDelete: string): void => {
-    // We need to identify all entries that belong to this date and remove their effect
-    const entriesToModify: DrinkEntry[] = [];
-    
-    // Group all entries by their adjusted day
-    const entriesByDay = new Map<string, DrinkEntry[]>();
-    
-    drinkHistory.forEach(entry => {
-      const day = getAdjustedDay(entry.timestamp);
-      if (!entriesByDay.has(day)) {
-        entriesByDay.set(day, []);
-      }
-      entriesByDay.get(day)!.push(entry);
-    });
-    
-    // Filter out the deleted date and any entries that came after it
-    const remainingEntries = drinkHistory.filter(entry => {
-      const day = getAdjustedDay(entry.timestamp);
-      return day !== dateToDelete;
-    });
-    
-    // Update the history and recalculate the current count
-    setDrinkHistory(remainingEntries);
-    
-    // If today's data was deleted, reset the count to 0
-    if (dateToDelete === getAdjustedDay(Date.now())) {
-      setCount(0);
-    } else {
-      // Otherwise, recalculate the current count based on remaining entries
-      const lastEntry = remainingEntries[remainingEntries.length - 1];
-      setCount(lastEntry ? lastEntry.count : 0);
-    }
+    // We need to identify all entries that belong to this date and remove them
+    setDrinkHistory(prev => 
+      prev.filter(entry => getAdjustedDay(entry.timestamp) !== dateToDelete)
+    );
   };
   
   // Delete drinks for a specific month
   const deleteDrinksByMonth = (monthToDelete: string): void => {
     // Filter out entries from the specified month
-    const remainingEntries = drinkHistory.filter(entry => {
-      const day = getAdjustedDay(entry.timestamp);
-      return !day.startsWith(monthToDelete);
-    });
-    
-    // Update the history
-    setDrinkHistory(remainingEntries);
-    
-    // Check if current month was deleted
-    const currentMonth = getAdjustedDay(Date.now()).substring(0, 7);
-    
-    // If current month's data was deleted, reset the count to 0
-    if (monthToDelete === currentMonth) {
-      setCount(0);
-    } else {
-      // Otherwise, recalculate the current count based on remaining entries
-      const lastEntry = remainingEntries[remainingEntries.length - 1];
-      setCount(lastEntry ? lastEntry.count : 0);
-    }
+    setDrinkHistory(prev => 
+      prev.filter(entry => !getAdjustedDay(entry.timestamp).startsWith(monthToDelete))
+    );
   };
   
   // Get date for URL format
@@ -345,7 +250,7 @@ export function useDrinkStorage() {
   };
   
   return {
-    count,
+    count: getCurrentCount(),
     incrementCount,
     decrementCount,
     addDrinkAtDateTime,
